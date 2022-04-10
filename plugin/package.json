@@ -1,0 +1,78 @@
+{
+  "name": "blender",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "build": "NODE_ENV=production webpack --mode=production && rm ./dist/Blender connect/ui.js  ./dist/Blender connect/ui.js.LICENSE.txt",
+    "lint": "eslint  --ext .tsx,.ts,.json,.js src/ --fix",
+    "start": "DEBUG=* webpack --watch"
+  },
+  "author": "Philip Stapelfeldt <me@ph1p.dev>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ph1p/figma-blender.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ph1p/figma-blender/issues"
+  },
+  "prettier": {
+    "singleQuote": true
+  },
+  "license": "ISC",
+  "dependencies": {
+    "buffer": "^6.0.3",
+    "mobx": "^6.5.0",
+    "mobx-react-lite": "^3.3.0",
+    "process": "^0.11.10",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.3.0",
+    "stream-browserify": "^3.0.0",
+    "styled-components": "^5.3.5"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.43.0",
+    "@types/node": "^17.0.23",
+    "@types/react": "^17.0.43",
+    "@types/react-dom": "^17.0.14",
+    "@types/styled-components": "^5.1.24",
+    "@typescript-eslint/eslint-plugin": "^5.17.0",
+    "@typescript-eslint/parser": "^5.17.0",
+    "create-file-webpack": "^1.0.2",
+    "css-loader": "^6.7.1",
+    "esbuild-loader": "^2.18.0",
+    "eslint": "^8.12.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-import-resolver-node": "^0.3.6",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.29.4",
+    "eslint-plugin-react-app": "^6.2.2",
+    "html-webpack-plugin": "^5.5.0",
+    "prettier": "^2.6.2",
+    "style-loader": "^3.3.1",
+    "terser-webpack-plugin": "v5.3.1",
+    "tsconfig-paths-webpack-plugin": "^3.5.2",
+    "typescript": "^4.6.3",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.71.0",
+    "webpack-bundle-analyzer": "^4.5.0",
+    "webpack-cli": "^4.9.2"
+  },
+  "figmaPlugin": {
+    "name": "Blender connect",
+    "id": "1095047912165244715",
+    "api": "1.0.0",
+    "main": "code.js",
+    "ui": "ui.html",
+    "enableProposedApi": false,
+    "editorType": [
+      "figma"
+    ]
+  },
+  "resolutions": {
+    "bn.js": "5.2.0"
+  },
+  "packageManager": "yarn@3.2.0"
+}

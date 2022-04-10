@@ -1,0 +1,6 @@
+export enum ConnectionEnum {
+  NOT_ALLOWED = 'NOT_ALLOWED',
+  CONNECTED = 'CONNECTED',
+  ERROR = 'ERROR',
+  CONNECTING = 'CONNECTING',
+}
