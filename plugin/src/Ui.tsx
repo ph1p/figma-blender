@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { MemoryRouter as Router, Route, Routes } from 'react-router-dom';
 import styled from 'styled-components';
+import slugify from 'slugify';
 
 import { SocketProvider } from './utils/SocketProvider';
 
@@ -48,7 +49,10 @@ const App = observer(() => {
             JSON.stringify({
               event: 'element_data',
               type: 'FILE_END',
-              name: `${frame.name}-${frame.id.replace(/:/g, '-')}`,
+              name: `${slugify(frame.name)}-${(+frame.id.replace(
+                ':',
+                58
+              )).toString(16)}`,
               width: frame.width,
               height: frame.height,
             })

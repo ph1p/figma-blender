@@ -17,9 +17,6 @@ def handle_material(data, name, width, height):
             path = figma.folder_path
 
         try:
-            name = name.replace('/', '-').replace('\\',
-                                                  '-').replace('.', '').replace(':', '')
-
             mat = bpy.data.materials.get(name)
 
             if mat is None:
