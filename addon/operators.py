@@ -1,5 +1,6 @@
-import asyncio
 import bpy
+import asyncio
+import os
 
 from bpy.types import Operator
 from .properties import globalDict
@@ -56,7 +57,7 @@ class FIGMA_OT_OpenBrowser(Operator):
     filepath: bpy.props.StringProperty(subtype="FILE_PATH")
 
     def execute(self, context):
-        context.scene.figma.folder_path = self.filepath
+        context.scene.figma.folder_path = os.path.dirname(self.filepath)
         bpy.context.area.tag_redraw()
 
         return {'FINISHED'}

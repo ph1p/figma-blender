@@ -6,25 +6,23 @@ import os.path
 
 from .properties import globalDict
 from .handle_material import handle_material
+from .errors import element_not_found, folder_not_writeable
 from .async_loop import *
-
-
-def element_not_found(self, context):
-    self.layout.label(
-        text="The element you're asking for seems not to be available anymore!")
 
 
 def get_element(id):
     if os.path.isdir(bpy.context.scene.figma.folder_path):
         loop = asyncio.get_event_loop()
 
-        for user in globalDict["connected"]:
-            loop.run_until_complete(user.send(json.dumps({
+        if not globalDict["connected"] is None:
+            loop.run_until_complete(globalDict["connected"].send(json.dumps({
                 "event": "get_element",
                 "id": id
             })))
     else:
         bpy.context.scene.figma.folder_path = ""
+        bpy.context.window_manager.popup_menu(
+            folder_not_writeable, title="Error", icon='ERROR')
 
 
 async def websocket_handler(websocket):
@@ -32,12 +30,12 @@ async def websocket_handler(websocket):
     if bpy.context.area:
         bpy.context.area.tag_redraw()
 
-    if len(globalDict["connected"]) >= 1:
+    if not globalDict["connected"] is None:
         await websocket.send(json.dumps({
             "event": "not_allowed",
         }))
     else:
-        globalDict["connected"].add(websocket)
+        globalDict["connected"] = websocket
 
         image_bytes = b''
 
@@ -79,11 +77,8 @@ async def websocket_handler(websocket):
 
     await websocket.wait_closed()
 
-    if websocket in globalDict["connected"]:
-        globalDict["connected"].remove(websocket)
-
-    if len(globalDict["connected"]) == 0:
-        bpy.context.scene.figma.plugin_connected = False
+    globalDict["connected"] = None
+    bpy.context.scene.figma.plugin_connected = False
 
     if bpy.context.area:
         bpy.context.area.tag_redraw()
