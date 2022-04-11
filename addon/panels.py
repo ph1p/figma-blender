@@ -1,4 +1,5 @@
 from bpy.types import Panel
+from .handle_material import get_selected_faces
 
 
 class FIGMA_PT_Panel(Panel):
@@ -47,11 +48,19 @@ class FIGMA_PT_Panel(Panel):
                         row.prop(figma, 'elements', icon="WINDOW")
 
                         row = layout.row()
-                        if len(context.view_layer.objects.selected) > 0:
-                            row.operator('figma.add_to_scene',
-                                         text="Add/Update texture")
+                        if context.object.mode == 'EDIT':
+                            if len(get_selected_faces()) > 0:
+                                row.operator('figma.add_to_scene',
+                                             text="Add/Update face")
+                            else:
+                                row.label(
+                                    text='Please select a face', icon="INFO")
                         else:
-                            row.operator('figma.add_to_scene')
+                            if len(context.view_layer.objects.selected) > 0:
+                                row.operator('figma.add_to_scene',
+                                             text="Add/Update texture")
+                            else:
+                                row.operator('figma.add_to_scene')
 
                 layout.row().separator()
 

@@ -1,4 +1,6 @@
+import bmesh
 import bpy
+import itertools
 
 
 def handle_material(data, name, width, height):
@@ -15,7 +17,8 @@ def handle_material(data, name, width, height):
             path = figma.folder_path
 
         try:
-            name = name.replace('/', '-').replace('\\', '-')
+            name = name.replace('/', '-').replace('\\',
+                                                  '-').replace('.', '').replace(':', '')
 
             mat = bpy.data.materials.get(name)
 
@@ -59,9 +62,46 @@ def handle_material(data, name, width, height):
                             ob.data.materials.append(mat)
                     except AttributeError:
                         print("object has no material")
+
+            if bpy.context.object.mode == 'EDIT':
+                for obj in bpy.context.objects_in_mode:
+                    found_index = -1
+                    for index, m in enumerate(obj.data.materials):
+                        if m.name == mat.name:
+                            found_index = index
+                            break
+
+                    if found_index >= 0:
+                        bm = bmesh.from_edit_mesh(obj.data)
+                        for face in bm.faces:
+                            if face.select:
+                                face.material_index = found_index
+                                bm.verts.index_update()
+                                bmesh.update_edit_mesh(obj.data)
+
         finally:
             del data
 
     figma.is_loading = False
     if bpy.context.area:
         bpy.context.area.tag_redraw()
+
+
+def get_selected_faces_of_object(obj):
+    faces = []
+
+    bm = bmesh.from_edit_mesh(obj.data)
+    for f in bm.faces:
+        if f.select:
+            faces.append(f)
+
+    return faces
+
+
+def get_selected_faces():
+    faces = []
+
+    for obj in bpy.context.objects_in_mode:
+        faces.append(get_selected_faces_of_object(obj))
+
+    return list(itertools.chain(*faces))

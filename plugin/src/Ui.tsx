@@ -48,7 +48,7 @@ const App = observer(() => {
             JSON.stringify({
               event: 'element_data',
               type: 'FILE_END',
-              name: frame.name,
+              name: `${frame.name}-${frame.id.replace(/:/g, '-')}`,
               width: frame.width,
               height: frame.height,
             })

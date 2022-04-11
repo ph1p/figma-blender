@@ -12,7 +12,9 @@ import { ConnectionEnum } from '../utils/interfaces';
 
 const FooterElement = () => (
   <Footer>
-    <a href="#" target="_blank">Get the Blender Addon {'->'}</a>
+    <a href="https://ph1p.gumroad.com/l/figma-blender-addon" target="_blank">
+      Get the Blender Addon {'->'}
+    </a>
   </Footer>
 );
 
@@ -186,6 +188,10 @@ const Button = styled.button`
   animation: ${gradient} 3s ease infinite;
   &:hover {
     background-size: 400% 100%;
+    &::after {
+      background-size: 400% 100%;
+      animation: ${gradient} 3s ease infinite;
+    }
   }
   &:active {
     top: 1px;

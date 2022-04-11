@@ -17,6 +17,7 @@ const getFrame = async (id) => {
 
     if (node && node.type !== 'PAGE' && node.type !== 'DOCUMENT') {
       return {
+        id: node.id,
         name: node.name,
         width: node.width,
         height: node.height,
