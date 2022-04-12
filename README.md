@@ -12,14 +12,34 @@ Search the "Blender connect" plugin in figma and install it.
 Download the "Figma Blender Addon" from here: https://ph1p.gumroad.com/l/figma-blender-addon and install it (Edit -> Preferences -> Addons -> Install...)
 
 - Start both Plugins. **Blender may freeze for a few seconds the first time, as dependencies are installed in the background.**
-- Press `n` in Blender to open you
-- In blender you should first choose a folder for the textures
+- Press `n` in Blender to open you the sidebar
+- Click on `Figma` and choose a folder for your textures
 - Next start the server and you're now able to import textures
 
 ## How is this repository structured?
 
 * addon -> Includes the Blender addon
 * plugin -> Includes the Figma plugin!
+
+## FAQ
+
+### My Plugin does no start!
+
+The plugin may not have been able to install the `wesocket` dependency. So you can also do this manually via the command line. You have to replace the Blender-Version (`2.92`) and maybe the python executable (`python3.7m`).
+
+**MacOS**
+
+```bash
+ /Applications/Blender.app/Contents/Resources/2.92/python/bin/python3.7m -m pip install websockets
+```
+
+**Windows**
+
+Run `cmd` and run this with admin rights.
+
+```bash
+"C:\Program Files\Blender Foundation\Blender 3.1\3.1\python\bin\python.exe" -m pip install websockets"
+```
 
 ## Development
 
