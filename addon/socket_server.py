@@ -26,7 +26,7 @@ def get_element(id):
 
 
 async def websocket_handler(websocket):
-    bpy.context.scene.figma.plugin_connected = True
+    globalDict["plugin_connected"] = True
     if bpy.context.area:
         bpy.context.area.tag_redraw()
 
@@ -78,7 +78,7 @@ async def websocket_handler(websocket):
     await websocket.wait_closed()
 
     globalDict["connected"] = None
-    bpy.context.scene.figma.plugin_connected = False
+    globalDict["plugin_connected"] = False
 
     if bpy.context.area:
         bpy.context.area.tag_redraw()
@@ -89,3 +89,5 @@ async def server():
 
     async with websockets.serve(websocket_handler, "localhost", 1410):
         await asyncio.Future()
+
+    globalDict["connected"] = None

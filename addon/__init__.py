@@ -7,7 +7,7 @@ from bpy.app.handlers import depsgraph_update_pre
 
 from .packages import check_deps_on_startup
 from .properties import FigmaProperties, FrameItemGroup, globalDict
-from .panels import FIGMA_PT_Panel
+from .panels import FIGMA_PT_elements, FIGMA_PT_folder_path, FIGMA_PT_main, FIGMA_PT_server
 from .operators import FIGMA_OT_add_to_scene, FIGMA_OT_Server, FIGMA_OT_OpenBrowser
 from .async_loop import *
 
@@ -30,14 +30,13 @@ classes = (
     FIGMA_OT_Server,
     FrameItemGroup,
     FigmaProperties,
-    FIGMA_PT_Panel,
+    FIGMA_PT_main,
+    FIGMA_PT_elements,
+    FIGMA_PT_folder_path,
+    FIGMA_PT_server,
     FIGMA_OT_OpenBrowser,
     FIGMA_OT_add_to_scene
 )
-
-# @persistent
-# def check_selected_objects(scene):
-#     print(bpy.context.view_layer.objects.selected)
 
 
 def register():
@@ -46,7 +45,6 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    # depsgraph_update_post.append(check_selected_objects)
     depsgraph_update_pre.append(check_deps_on_startup)
 
     Scene.figma = PointerProperty(type=FigmaProperties)
@@ -57,7 +55,6 @@ def unregister():
         globalDict["server_task"].cancel()
         bpy.context.scene.figma.is_started = False
 
-    # depsgraph_update_post.remove(check_selected_objects)
     try:
         depsgraph_update_pre.remove(check_deps_on_startup)
     except ValueError:

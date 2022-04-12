@@ -5,7 +5,11 @@ from bpy.props import EnumProperty, BoolProperty, CollectionProperty, StringProp
 
 globalDict = {
     "server_task": None,
-    "connected": set()
+    "connected": None,
+    "is_started": False,
+    "is_loading": False,
+    "plugin_connected": False,
+    "deps_installed": False,
 }
 
 
@@ -30,11 +34,3 @@ class FigmaProperties(PropertyGroup):
         name='Elements',
         description='Found elements in figma file',
         items=get_items)
-
-    is_started: BoolProperty(default=False)
-
-    is_loading: BoolProperty(default=False)
-
-    plugin_connected: BoolProperty(default=False)
-
-    deps_installed: BoolProperty(default=False)

@@ -16,7 +16,7 @@ class FIGMA_OT_add_to_scene(Operator):
 
     @classmethod
     def poll(cls, context):
-        return not context.scene.figma.is_loading
+        return not globalDict["is_loading"]
 
     def execute(self, context):
         get_element(context.scene.figma.elements)
@@ -32,17 +32,17 @@ class FIGMA_OT_Server(Operator):
     bl_label = "Start server"
 
     def execute(self, context):
-        figma = context.scene.figma
-        figma.is_loading = False
+        globalDict["is_loading"] = False
 
-        if not figma.is_started:
+        if not globalDict["is_started"]:
             globalDict["server_task"] = asyncio.ensure_future(server())
             ensure_async_loop()
-            figma.is_started = True
+            globalDict["is_started"] = True
         else:
             globalDict["server_task"].cancel()
             asyncio.get_event_loop().stop()
-            figma.is_started = False
+            globalDict["is_started"] = False
+            globalDict["connected"] = None
 
         context.area.tag_redraw()
 

@@ -1,13 +1,16 @@
 import bmesh
 import bpy
+import os
 import itertools
+
+from .properties import globalDict
 
 
 def handle_material(data, name, width, height):
     figma = bpy.context.scene.figma
 
-    if not figma.is_loading:
-        figma.is_loading = True
+    if not globalDict["is_loading"]:
+        globalDict["is_loading"] = True
         if bpy.context.area:
             bpy.context.area.tag_redraw()
 
@@ -22,7 +25,9 @@ def handle_material(data, name, width, height):
             if mat is None:
                 mat = bpy.data.materials.new(name=name)
 
-            file = open(path + mat.name + ".png", "wb")
+            file_path = os.path.join(path, name + ".png")
+
+            file = open(file_path, "wb")
             file.write(data)
             file.close()
 
@@ -30,17 +35,20 @@ def handle_material(data, name, width, height):
             nodes = mat.node_tree.nodes
 
             bsdf = nodes["Principled BSDF"]
-            texImage = nodes.get(mat.name)
+            texImage = nodes.get(name)
 
             if texImage is None:
                 texImage = nodes.new('ShaderNodeTexImage')
-                texImage.label = mat.name
-                texImage.name = mat.name
-                texImage.image = bpy.data.images.load(path + mat.name + ".png")
+                texImage.label = name
+                texImage.name = name
+                texImage.image = bpy.data.images.load(file_path)
                 mat.node_tree.links.new(
                     bsdf.inputs['Base Color'], texImage.outputs['Color'])
             else:
-                bpy.data.images[mat.name + ".png"].reload()
+                if not texImage.image is None:
+                    bpy.data.images[name + ".png"].reload()
+                else:
+                    texImage.image = bpy.data.images.load(file_path)
 
             if len(bpy.context.view_layer.objects.selected) == 0:
                 ob = bpy.ops.mesh.primitive_plane_add()
@@ -52,7 +60,7 @@ def handle_material(data, name, width, height):
                 for ob in bpy.context.view_layer.objects.selected:
                     try:
                         for index, m in enumerate(ob.data.materials):
-                            if m.name == mat.name:
+                            if not m is None and m.name == name:
                                 ob.data.materials[index] = mat
                                 break
                         else:
@@ -64,7 +72,7 @@ def handle_material(data, name, width, height):
                 for obj in bpy.context.objects_in_mode:
                     found_index = -1
                     for index, m in enumerate(obj.data.materials):
-                        if m.name == mat.name:
+                        if not m is None and m.name == name:
                             found_index = index
                             break
 
@@ -76,10 +84,13 @@ def handle_material(data, name, width, height):
                                 bm.verts.index_update()
                                 bmesh.update_edit_mesh(obj.data)
 
+        except:
+            print("Error")
+
         finally:
             del data
 
-    figma.is_loading = False
+    globalDict["is_loading"] = False
     if bpy.context.area:
         bpy.context.area.tag_redraw()
 
