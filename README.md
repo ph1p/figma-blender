@@ -5,6 +5,10 @@
 This Blender & Figma addon offers you the possibility to load textures directly from Figma into Blender file.
 You can apply them directly to selected objects or simply paste them as a plane.
 
+## Demo
+
+https://user-images.githubusercontent.com/15351728/163018521-d6d704bb-f280-499c-a4bb-7cf3d3fea132.mp4
+
 
 ## How to?
 
