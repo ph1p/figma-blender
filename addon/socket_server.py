@@ -6,7 +6,7 @@ import os.path
 
 from .properties import globalDict
 from .handle_material import handle_material
-from .errors import element_not_found, folder_not_writeable
+from .errors import cannot_start_server, element_not_found, folder_not_writeable
 from .async_loop import *
 
 
@@ -52,11 +52,10 @@ async def websocket_handler(websocket):
                     if payload["elements"] and bpy.context.scene.figma is not None:
                         bpy.context.scene.figma.page_name = payload["page_name"]
 
-                        bpy.context.scene.figma.items.clear()
+                        globalDict["elements"].clear()
                         for frame in payload["elements"]:
-                            newFrame = bpy.context.scene.figma.items.add()
-                            newFrame.id = frame["id"]
-                            newFrame.name = frame["name"]
+                            globalDict["elements"].append(
+                                (frame["id"], frame["name"], ""))
                     if bpy.context.area:
                         bpy.context.area.tag_redraw()
 
@@ -87,7 +86,18 @@ async def websocket_handler(websocket):
 async def server():
     websockets = importlib.import_module("websockets")
 
-    async with websockets.serve(websocket_handler, "localhost", 1410):
-        await asyncio.Future()
+    try:
+        async with websockets.serve(websocket_handler, "localhost", 1410):
+            await asyncio.Future()
+    except:
+        bpy.context.window_manager.popup_menu(
+            cannot_start_server, title="Error", icon='ERROR')
+
+        globalDict["server_task"].cancel()
+        asyncio.get_event_loop().stop()
+        globalDict["is_started"] = False
 
     globalDict["connected"] = None
+
+    if not bpy.context.area is None:
+        bpy.context.area.tag_redraw()

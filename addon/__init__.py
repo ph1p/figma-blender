@@ -6,7 +6,7 @@ from bpy.props import PointerProperty
 from bpy.app.handlers import depsgraph_update_pre
 
 from .packages import check_deps_on_startup
-from .properties import FigmaProperties, FrameItemGroup, globalDict
+from .properties import FigmaProperties, globalDict
 from .panels import FIGMA_PT_elements, FIGMA_PT_folder_path, FIGMA_PT_main, FIGMA_PT_server
 from .operators import FIGMA_OT_add_to_scene, FIGMA_OT_Server, FIGMA_OT_OpenBrowser
 from .async_loop import *
@@ -28,7 +28,6 @@ bl_info = {
 classes = (
     AsyncLoopModalOperator,
     FIGMA_OT_Server,
-    FrameItemGroup,
     FigmaProperties,
     FIGMA_PT_main,
     FIGMA_PT_elements,

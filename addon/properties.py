@@ -10,26 +10,17 @@ globalDict = {
     "is_loading": False,
     "plugin_connected": False,
     "deps_installed": False,
+    "elements": []
 }
 
 
 def get_items(self, context):
-    items = []
-    for item in bpy.context.scene.figma.items:
-        items.append((item.id, item.name, ""))
-    return items
-
-
-class FrameItemGroup(bpy.types.PropertyGroup):
-    id: StringProperty()
-    name: StringProperty()
+    return globalDict["elements"]
 
 
 class FigmaProperties(PropertyGroup):
-    items: CollectionProperty(type=FrameItemGroup)
     folder_path: StringProperty(default="")
     page_name: StringProperty(default="")
-
     elements: EnumProperty(
         name='Elements',
         description='Found elements in figma file',

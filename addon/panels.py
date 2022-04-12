@@ -82,10 +82,10 @@ class FIGMA_PT_elements(FigmaPanel, Panel):
             row.label(text='Waiting for plugin...', icon="INFO")
         else:
             row = layout.row()
-            row.label(text='Page: ' + figma.page_name, icon="PAGE")
+            row.label(text='Page: ' + figma.page_name, icon="FILE_BLANK")
 
             row = layout.row()
-            row.prop(figma, 'elements', icon="WINDOW")
+            row.prop(figma, 'elements', icon="TEXTURE")
 
             row = layout.row()
             if context.object.mode == 'EDIT':
