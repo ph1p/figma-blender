@@ -70,7 +70,7 @@ class FIGMA_PT_elements(FigmaPanel, Panel):
 
     @classmethod
     def poll(self, context):
-        return globalDict["is_started"]
+        return globalDict["is_started"] and not globalDict["connected"] is None and context.scene.figma.folder_path != ""
 
     def draw(self, context):
         layout = self.layout
