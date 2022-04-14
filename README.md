@@ -15,10 +15,11 @@ https://user-images.githubusercontent.com/15351728/163018521-d6d704bb-f280-499c-
 Search the "Blender connect" plugin in figma and install it.
 Download the "Figma Blender Addon" from here: https://ph1p.gumroad.com/l/figma-blender-addon and install it (Edit -> Preferences -> Addons -> Install...)
 
-- Start both Plugins. **Blender may freeze for a few seconds the first time, as dependencies are installed in the background.**
-- Press `n` in Blender to open you the sidebar
+- Start Figma Plugin (https://www.figma.com/community/plugin/1095047912165244715/Blender-connect) 
+- Start Blender Addon. **Blender may freeze for a few seconds the first time, as dependencies are installed in the background.**
+- Press `n` in Blender to open the sidebar
 - Click on `Figma` and choose a folder for your textures
-- Next start the server and you're now able to import textures
+- Next start the server. The figma plugin UI should change and you're now able to import textures
 
 ## How is this repository structured?
 
@@ -29,7 +30,7 @@ Download the "Figma Blender Addon" from here: https://ph1p.gumroad.com/l/figma-b
 
 ### My Plugin does no start!
 
-The plugin may not have been able to install the `wesocket` dependency. So you can also do this manually via the command line. You have to replace the Blender-Version (`2.92`) and maybe the python executable (`python3.7m`).
+The plugin may not have been able to install the `websockets` dependency. So you can also do this manually via the command line. You have to replace the Blender-Version (`2.92`) and maybe the python executable (`python3.7m`).
 
 **MacOS**
 
@@ -55,6 +56,8 @@ Just go into the **plugin** folder and run the following commands:
 yarn install
 yarn start # runs dev server
 ```
+
+After that you only need to import it into figma under the Plugin section.
 
 ### Blender
 
