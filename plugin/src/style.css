@@ -11,11 +11,12 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #fff;
+  background-color: var(--figma-color-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 12px;
   margin: 0;
+  color: var(--figma-color-text);
 }
 
 ::-webkit-scrollbar {

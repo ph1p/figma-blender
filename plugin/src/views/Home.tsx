@@ -13,7 +13,7 @@ import { ConnectionEnum } from '../utils/interfaces';
 const FooterElement = () => (
   <Footer>
     <a href="https://ph1p.gumroad.com/l/figma-blender-addon" target="_blank">
-      Get the Blender Addon {'->'}
+      Get the Blender Addon (it's free) {'->'}
     </a>
   </Footer>
 );
@@ -86,7 +86,7 @@ const List = styled.ul`
   padding: 0;
   li {
     font-weight: 600;
-    background-color: #f3f3f3;
+    background-color: var(--figma-color-bg);
     display: flex;
     padding: 12px 15px;
     border-radius: 8px 8px 0 0;
@@ -102,6 +102,9 @@ const List = styled.ul`
         &.element {
           width: 12px;
           height: 12px;
+        }
+        path {
+          fill: var(--figma-color-text);
         }
       }
     }

@@ -3,6 +3,7 @@ import EventEmitter from '../shared/EventEmitter';
 figma.showUI(__html__, {
   width: 240,
   height: 216,
+  themeColors: true,
 });
 
 const getElements = () =>
