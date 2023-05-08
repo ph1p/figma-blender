@@ -26,7 +26,7 @@ const getFrame = async (id) => {
           format: 'PNG',
           constraint: {
             type: 'SCALE',
-            value: 1,
+            value: 2,
           },
         }),
       };

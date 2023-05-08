@@ -44,6 +44,8 @@ def handle_material(data, name, width, height):
                 texImage.image = bpy.data.images.load(file_path)
                 mat.node_tree.links.new(
                     bsdf.inputs['Base Color'], texImage.outputs['Color'])
+                mat.node_tree.links.new(
+                    bsdf.inputs['BSDF Alpha'], texImage.outputs['Alpha'])
             else:
                 if not texImage.image is None:
                     bpy.data.images[name + ".png"].reload()

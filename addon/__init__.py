@@ -15,7 +15,7 @@ bl_info = {
     "name": "Figma",
     "author": "Philip Stapelfeldt",
     "location": "View3D > Panel > Figma",
-    "version": (0, 0, 1),
+    "version": (0, 0, 2),
     "blender": (2, 81, 0),
     "description": "Import textures from figma",
     "warning": "Blender does not respond for a few seconds when first started because dependencies are being installed",

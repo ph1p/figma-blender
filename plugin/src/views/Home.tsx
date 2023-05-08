@@ -2,7 +2,7 @@ import { observer } from 'mobx-react-lite';
 import React, { FunctionComponent } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { BlenderLogo } from '../assets/BlenderLogo';
-import { ElementIcon } from '../assets/Elementicon';
+import { ElementIcon } from '../assets/ElementIcon';
 import { FigmaLogo } from '../assets/FigmaLogo';
 import { PageIcon } from '../assets/PageIcon';
 import EventEmitter from '../shared/EventEmitter';
