@@ -7,9 +7,10 @@ from .properties import globalDict
 
 class FigmaPanel(Panel):
     """The Figma Panel"""
+
     bl_label = "Figma"
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
     bl_category = "Figma"
 
 
@@ -22,7 +23,7 @@ class FIGMA_PT_main(FigmaPanel, Panel):
 
         if not globalDict["deps_installed"]:
             row = layout.row()
-            row.label(text='Check/Installing dependencies...', icon="INFO")
+            row.label(text="Check/Installing dependencies...", icon="INFO")
 
 
 class FIGMA_PT_folder_path(FigmaPanel, Panel):
@@ -39,11 +40,11 @@ class FIGMA_PT_folder_path(FigmaPanel, Panel):
             row.label(text=figma.folder_path, icon="FILE_FOLDER")
 
         row = layout.row()
-        row.operator('figma.open_browser', text="Choose Folder")
+        row.operator("figma.open_browser", text="Choose Folder")
 
         if not figma.folder_path:
             row = layout.row()
-            row.label(text='Please choose a folder first', icon="INFO")
+            row.label(text="Please choose a folder first", icon="INFO")
 
 
 class FIGMA_PT_server(FigmaPanel, Panel):
@@ -59,9 +60,9 @@ class FIGMA_PT_server(FigmaPanel, Panel):
 
         row = layout.row()
         if globalDict["is_started"]:
-            row.operator('figma.server', text="Stop server")
+            row.operator("figma.server", text="Stop server")
         else:
-            row.operator('figma.server', text="Start server")
+            row.operator("figma.server", text="Start server")
 
 
 class FIGMA_PT_elements(FigmaPanel, Panel):
@@ -70,7 +71,11 @@ class FIGMA_PT_elements(FigmaPanel, Panel):
 
     @classmethod
     def poll(self, context):
-        return globalDict["is_started"] and not globalDict["connected"] is None and context.scene.figma.folder_path != ""
+        return (
+            globalDict["is_started"]
+            and not globalDict["connected"] is None
+            and context.scene.figma.folder_path != ""
+        )
 
     def draw(self, context):
         layout = self.layout
@@ -79,25 +84,23 @@ class FIGMA_PT_elements(FigmaPanel, Panel):
 
         if not globalDict["plugin_connected"]:
             row = layout.row()
-            row.label(text='Waiting for plugin...', icon="INFO")
+            row.label(text="Waiting for plugin...", icon="INFO")
         else:
             row = layout.row()
-            row.label(text='Page: ' + figma.page_name, icon="FILE_BLANK")
+            row.label(text="Page: " + figma.page_name, icon="FILE_BLANK")
 
             row = layout.row()
-            row.prop(figma, 'elements', icon="TEXTURE")
+            row.prop(figma, "elements", icon="TEXTURE")
 
             row = layout.row()
-            if context.object.mode == 'EDIT':
+
+            if context.object and context.object.mode == "EDIT":
                 if len(get_selected_faces()) > 0:
-                    row.operator('figma.add_to_scene',
-                                 text="Add/Update face")
+                    row.operator("figma.add_to_scene", text="Add/Update face")
                 else:
-                    row.label(
-                        text='Please select a face', icon="INFO")
+                    row.label(text="Please select a face", icon="INFO")
             else:
                 if len(context.view_layer.objects.selected) > 0:
-                    row.operator('figma.add_to_scene',
-                                 text="Add/Update texture")
+                    row.operator("figma.add_to_scene", text="Add/Update texture")
                 else:
-                    row.operator('figma.add_to_scene')
+                    row.operator("figma.add_to_scene")

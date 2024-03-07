@@ -71,6 +71,10 @@
     "editorType": [
       "figma"
     ],
+    "networkAccess": {
+      "allowedDomains": ["ws://localhost:1410"],
+      "reasoning": "Blender Server"
+    },
     "documentAccess": "dynamic-page"
   },
   "resolutions": {

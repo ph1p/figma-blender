@@ -14,7 +14,7 @@ def check_deps_on_startup(scene):
     if scene is not None:
         print("install...")
         globalDict["deps_installed"] = False
-        websockets_find = util.find_spec('websockets')
+        websockets_find = util.find_spec("websockets")
 
         if websockets_find is None:
             loop = asyncio.get_event_loop()

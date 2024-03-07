@@ -34,18 +34,28 @@ def handle_material(data, name, width, height):
             mat.use_nodes = True
             nodes = mat.node_tree.nodes
 
-            bsdf = nodes["Principled BSDF"]
+            bsdf = nodes.get("Principled BSDF")
+
+            if not bsdf:
+                bsdf = nodes.new(type="ShaderNodeBsdfPrincipled")
+
             texImage = nodes.get(name)
 
             if texImage is None:
-                texImage = nodes.new('ShaderNodeTexImage')
+                texImage = nodes.new("ShaderNodeTexImage")
                 texImage.label = name
                 texImage.name = name
                 texImage.image = bpy.data.images.load(file_path)
-                mat.node_tree.links.new(
-                    bsdf.inputs['Base Color'], texImage.outputs['Color'])
-                mat.node_tree.links.new(
-                    bsdf.inputs['BSDF Alpha'], texImage.outputs['Alpha'])
+
+                if bsdf and texImage:
+                    mat.node_tree.links.new(
+                        bsdf.inputs["Base Color"], texImage.outputs["Color"]
+                    )
+
+                    if "BSDF Alpha" in bsdf.inputs and "Alpha" in texImage.outputs:
+                        mat.node_tree.links.new(
+                            bsdf.inputs["BSDF Alpha"], texImage.outputs["Alpha"]
+                        )
             else:
                 if not texImage.image is None:
                     bpy.data.images[name + ".png"].reload()
@@ -70,7 +80,7 @@ def handle_material(data, name, width, height):
                     except AttributeError:
                         print("object has no material")
 
-            if bpy.context.object.mode == 'EDIT':
+            if bpy.context.object.mode == "EDIT":
                 for obj in bpy.context.objects_in_mode:
                     found_index = -1
                     for index, m in enumerate(obj.data.materials):
@@ -86,8 +96,8 @@ def handle_material(data, name, width, height):
                                 bm.verts.index_update()
                                 bmesh.update_edit_mesh(obj.data)
 
-        except:
-            print("Error")
+        except Exception as e:
+            print("Error: %s", repr(e))
 
         finally:
             del data
