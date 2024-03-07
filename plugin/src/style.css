@@ -35,3 +35,8 @@ body {
   border-radius: 6px;
   background-color: #000;
 }
+
+select {
+  background-color: var(--figma-color-bg);
+  color: var(--figma-color-bg-inverse);
+}

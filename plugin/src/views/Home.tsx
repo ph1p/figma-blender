@@ -9,10 +9,15 @@ import EventEmitter from '../shared/EventEmitter';
 
 import { useStore } from '../store';
 import { ConnectionEnum } from '../utils/interfaces';
+import { ScalingIcon } from '../assets/ScalingIcon';
 
 const FooterElement = () => (
   <Footer>
-    <a href="https://ph1p.gumroad.com/l/figma-blender-addon" target="_blank">
+    <a
+      href="https://ph1p.gumroad.com/l/figma-blender-addon"
+      target="_blank"
+      rel="noreferrer"
+    >
       Get the Blender Addon (it's free) {'->'}
     </a>
   </Footer>
@@ -38,7 +43,7 @@ const Home: FunctionComponent = observer(() => {
               'Waiting for Blender...'
             )}
           </p>
-          <Progress></Progress>
+          <Progress />
         </Loader>
         <FooterElement />
       </Wrapper>
@@ -62,6 +67,25 @@ const Home: FunctionComponent = observer(() => {
               Page
             </div>
             <div>{store.page_name}</div>
+          </li>
+          <li>
+            <div className="name">
+              <ScalingIcon className="icon" />
+              Image/Scale
+            </div>
+            <div>
+              <select
+                name="scaling"
+                value={store.scaling}
+                onChange={(e) => store.setScaling(+e.currentTarget.value)}
+              >
+                <option value="0.5">0.5x</option>
+                <option value="0.75">0.75x</option>
+                <option value="1">1x</option>
+                <option value="2">2x</option>
+                <option value="3">3x</option>
+              </select>
+            </div>
           </li>
         </List>
         <Button onClick={askForFrames}>

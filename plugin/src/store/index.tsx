@@ -13,6 +13,7 @@ export class RootStore {
   notAllowed = false;
   elements = [];
   page_name = '';
+  scaling = 1;
 
   setStatus(status: ConnectionEnum) {
     this.status = status;
@@ -28,6 +29,10 @@ export class RootStore {
 
   setPageName(page_name) {
     this.page_name = page_name;
+  }
+
+  setScaling(scaling) {
+    this.scaling = scaling;
   }
 }
 

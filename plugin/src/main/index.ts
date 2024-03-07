@@ -2,19 +2,19 @@ import EventEmitter from '../shared/EventEmitter';
 
 figma.showUI(__html__, {
   width: 240,
-  height: 216,
+  height: 256,
   themeColors: true,
 });
 
 const getElements = () =>
   figma.currentPage.children.map((node) => ({
     id: node.id,
-    name: node.name,
+    name: node.name.substring(0, 20),
   }));
 
-const getFrame = async (id) => {
+const getFrame = async ({ id, scaling }) => {
   try {
-    const node = figma.getNodeById(id);
+    const node = await figma.getNodeByIdAsync(id);
 
     if (node && node.type !== 'PAGE' && node.type !== 'DOCUMENT') {
       return {
@@ -26,7 +26,7 @@ const getFrame = async (id) => {
           format: 'PNG',
           constraint: {
             type: 'SCALE',
-            value: 2,
+            value: scaling || 1,
           },
         }),
       };
@@ -42,8 +42,8 @@ const sendData = () =>
     page_name: figma.currentPage.name,
   });
 
-EventEmitter.answer('frame', async (id) => {
-  return getFrame(id);
+EventEmitter.answer('frame', async (data) => {
+  return getFrame(data);
 });
 
 EventEmitter.on('get elements', () => {

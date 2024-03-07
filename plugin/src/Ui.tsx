@@ -30,44 +30,46 @@ const App = observer(() => {
       const data = JSON.parse(e.data);
 
       const sendElement = async (id) => {
-        const frame: any = await EventEmitter.ask('frame', id);
+        await EventEmitter.ask('frame', { id, scaling: store.scaling }).then(
+          (frame: any) => {
+            if (frame) {
+              let chunks = chunkData(frame.data);
 
-        if (frame) {
-          let chunks = chunkData(frame.data);
+              for (const chunk of chunks) {
+                ws.send(
+                  JSON.stringify({
+                    event: 'element_data',
+                    type: 'FILE_DATA',
+                    data: Array.from(chunk),
+                  }),
+                );
+              }
 
-          for (const chunk of chunks) {
-            ws.send(
-              JSON.stringify({
-                event: 'element_data',
-                type: 'FILE_DATA',
-                data: Array.from(chunk),
-              })
-            );
-          }
+              ws.send(
+                JSON.stringify({
+                  event: 'element_data',
+                  type: 'FILE_END',
+                  name: `${slugify(frame.name)}-${(+frame.id.replace(
+                    ':',
+                    58,
+                  )).toString(16)}`,
+                  width: frame.width,
+                  height: frame.height,
+                }),
+              );
 
-          ws.send(
-            JSON.stringify({
-              event: 'element_data',
-              type: 'FILE_END',
-              name: `${slugify(frame.name)}-${(+frame.id.replace(
-                ':',
-                58
-              )).toString(16)}`,
-              width: frame.width,
-              height: frame.height,
-            })
-          );
-
-          chunks = [];
-          delete frame.data;
-        } else {
-          ws.send(
-            JSON.stringify({
-              event: 'element_data',
-              type: 'FILE_ERROR',
-            })
-          );
-        }
+              chunks = [];
+              delete frame.data;
+            } else {
+              ws.send(
+                JSON.stringify({
+                  event: 'element_data',
+                  type: 'FILE_ERROR',
+                }),
+              );
+            }
+          },
+        );
       };
 
       if (data.event === 'get_element') {
@@ -85,13 +87,12 @@ const App = observer(() => {
       EventEmitter.on('data', ({ elements, page_name }) => {
         store.setElements(elements);
         store.setPageName(page_name);
-
         socket.send(
           JSON.stringify({
             event: 'data',
             elements: elements || [],
             page_name,
-          })
+          }),
         );
       });
     }
@@ -119,5 +120,5 @@ const root = createRoot(document.getElementById('app'));
 root.render(
   <StoreProvider>
     <App />
-  </StoreProvider>
+  </StoreProvider>,
 );
