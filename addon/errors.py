@@ -1,6 +1,6 @@
 def element_not_found(self, context):
     self.layout.label(
-        text="TThe item you are asking for seems to be no longer available!")
+        text="The item you are asking for seems to be no longer available!")
 
 
 def folder_not_writeable(self, context):

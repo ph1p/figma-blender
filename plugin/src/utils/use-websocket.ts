@@ -1,50 +1,80 @@
-import React, { useEffect } from 'react';
-import { useStore } from '../store';
-import { ConnectionEnum } from './interfaces';
+import React, { useEffect } from "react";
+import { useStore } from "../store";
+import { ConnectionEnum } from "./interfaces";
 
 export const useWebSocket = ({ url, onmessage }) => {
-  const store = useStore();
-  const [socket, _setSocket] = React.useState<WebSocket>(null);
+	const store = useStore();
+	const [socket, _setSocket] = React.useState<WebSocket>(null);
 
-  const socketRef = React.useRef(socket);
-  const setSocket = (data) => {
-    socketRef.current = data;
-    _setSocket(data);
-  };
+	const socketRef = React.useRef(socket);
+	const onmessageRef = React.useRef(onmessage);
 
-  useEffect(() => {
-    let timeout;
+	// Keep the ref updated with the latest onmessage callback
+	useEffect(() => {
+		onmessageRef.current = onmessage;
+	}, [onmessage]);
 
-    const connect = () => {
-      const ws = new WebSocket(url);
+	const setSocket = React.useCallback((data) => {
+		socketRef.current = data;
+		_setSocket(data);
+	}, []);
 
-      ws.onmessage = (e) => onmessage(e, ws);
+	useEffect(() => {
+		let timeout: NodeJS.Timeout | undefined;
+		let ws: WebSocket | null = null;
+		let shouldReconnect = true;
 
-      ws.onopen = () => {
-        store.setStatus(ConnectionEnum.CONNECTED);
-        setSocket(ws);
-        clearTimeout(timeout);
-      };
+		const connect = () => {
+			// Don't connect if we're cleaning up
+			if (!shouldReconnect) return;
 
-      ws.onclose = () => {
-        store.setStatus(ConnectionEnum.CONNECTING);
-        setSocket(null);
-        timeout = setTimeout(() => {
-          connect();
-        }, 1000);
-      };
+			ws = new WebSocket(url);
 
-      ws.onerror = () => {
-        store.setStatus(ConnectionEnum.ERROR);
-        setSocket(null);
-        ws.close();
-      };
-    };
+			ws.onmessage = (e) => onmessageRef.current(e, ws);
 
-    connect();
-  }, []);
+			ws.onopen = () => {
+				store.setStatus(ConnectionEnum.CONNECTED);
+				setSocket(ws);
+				clearTimeout(timeout);
+			};
 
-  return {
-    socket: socketRef.current,
-  };
+			ws.onclose = () => {
+				// Only reconnect if we should and we're not cleaning up
+				if (!shouldReconnect) return;
+
+				store.setStatus(ConnectionEnum.CONNECTING);
+				setSocket(null);
+				timeout = setTimeout(() => {
+					if (shouldReconnect) {
+						connect();
+					}
+				}, 1000);
+			};
+
+			ws.onerror = () => {
+				store.setStatus(ConnectionEnum.ERROR);
+				setSocket(null);
+				ws?.close();
+			};
+		};
+
+		connect();
+
+		// Cleanup function to close connection and prevent reconnection
+		return () => {
+			shouldReconnect = false;
+			clearTimeout(timeout);
+			if (ws) {
+				ws.onclose = null; // Prevent reconnection
+				ws.onerror = null;
+				ws.onmessage = null;
+				ws.onopen = null;
+				ws.close();
+			}
+		};
+	}, [setSocket, store.setStatus, url]);
+
+	return {
+		socket: socketRef.current,
+	};
 };

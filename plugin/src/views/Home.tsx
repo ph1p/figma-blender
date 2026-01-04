@@ -1,107 +1,106 @@
-import { observer } from 'mobx-react-lite';
-import React, { FunctionComponent } from 'react';
-import styled, { keyframes } from 'styled-components';
-import { BlenderLogo } from '../assets/BlenderLogo';
-import { ElementIcon } from '../assets/ElementIcon';
-import { FigmaLogo } from '../assets/FigmaLogo';
-import { PageIcon } from '../assets/PageIcon';
-import EventEmitter from '../shared/EventEmitter';
-
-import { useStore } from '../store';
-import { ConnectionEnum } from '../utils/interfaces';
-import { ScalingIcon } from '../assets/ScalingIcon';
+import { observer } from "mobx-react-lite";
+import type { FunctionComponent } from "react";
+import styled, { keyframes } from "styled-components";
+import { BlenderLogo } from "../assets/BlenderLogo";
+import { ElementIcon } from "../assets/ElementIcon";
+import { FigmaLogo } from "../assets/FigmaLogo";
+import { PageIcon } from "../assets/PageIcon";
+import { ScalingIcon } from "../assets/ScalingIcon";
+import EventEmitter from "../shared/EventEmitter";
+import { useStore } from "../store";
+import { ConnectionEnum } from "../utils/interfaces";
 
 const FooterElement = () => (
-  <Footer>
-    <a
-      href="https://ph1p.gumroad.com/l/figma-blender-addon"
-      target="_blank"
-      rel="noreferrer"
-    >
-      Get the Blender Addon (it's free) {'->'}
-    </a>
-  </Footer>
+	<Footer>
+		<a
+			href="https://ph1p.gumroad.com/l/figma-blender-addon"
+			target="_blank"
+			rel="noreferrer"
+		>
+			Get the Blender Addon (it's free) {"->"}
+		</a>
+	</Footer>
 );
 
 const Home: FunctionComponent = observer(() => {
-  const store = useStore();
+	const store = useStore();
 
-  const askForFrames = () => EventEmitter.emit('get elements');
+	const askForFrames = () => EventEmitter.emit("get elements");
 
-  if (store.status === ConnectionEnum.CONNECTING || store.notAllowed) {
-    return (
-      <Wrapper>
-        <Loader>
-          <p>
-            {store.notAllowed ? (
-              <>
-                One connected plugin
-                <br />
-                at a time is allowed
-              </>
-            ) : (
-              'Waiting for Blender...'
-            )}
-          </p>
-          <Progress />
-        </Loader>
-        <FooterElement />
-      </Wrapper>
-    );
-  }
+	if (store.status === ConnectionEnum.CONNECTING || store.notAllowed) {
+		return (
+			<Wrapper>
+				<Loader>
+					<p>
+						{store.notAllowed ? (
+							<>
+								One connected plugin
+								<br />
+								at a time is allowed
+							</>
+						) : (
+							"Waiting for Blender..."
+						)}
+					</p>
+					<Progress />
+				</Loader>
+				<FooterElement />
+			</Wrapper>
+		);
+	}
 
-  return (
-    <Wrapper>
-      <div>
-        <List>
-          <li>
-            <div className="name">
-              <ElementIcon className="icon element" />
-              Elements
-            </div>
-            <div>{store.elements.length}</div>
-          </li>
-          <li>
-            <div className="name">
-              <PageIcon className="icon" />
-              Page
-            </div>
-            <div>{store.page_name}</div>
-          </li>
-          <li>
-            <div className="name">
-              <ScalingIcon className="icon" />
-              Image/Scale
-            </div>
-            <div>
-              <select
-                name="scaling"
-                value={store.scaling}
-                onChange={(e) => store.setScaling(+e.currentTarget.value)}
-              >
-                <option value="0.5">0.5x</option>
-                <option value="0.75">0.75x</option>
-                <option value="1">1x</option>
-                <option value="2">2x</option>
-                <option value="3">3x</option>
-              </select>
-            </div>
-          </li>
-        </List>
-        <Button onClick={askForFrames}>
-          <div className="icon">
-            <FigmaLogo />
-          </div>
-          <div>Update Elements</div>
-          <div className="icon">
-            <BlenderLogo />
-          </div>
-        </Button>
-      </div>
+	return (
+		<Wrapper>
+			<div>
+				<List>
+					<li>
+						<div className="name">
+							<ElementIcon className="icon element" />
+							Elements
+						</div>
+						<div>{store.elements.length}</div>
+					</li>
+					<li>
+						<div className="name">
+							<PageIcon className="icon" />
+							Page
+						</div>
+						<div>{store.page_name}</div>
+					</li>
+					<li>
+						<div className="name">
+							<ScalingIcon className="icon" />
+							Image/Scale
+						</div>
+						<div>
+							<select
+								name="scaling"
+								value={store.scaling}
+								onChange={(e) => store.setScaling(+e.currentTarget.value)}
+							>
+								<option value="0.5">0.5x</option>
+								<option value="0.75">0.75x</option>
+								<option value="1">1x</option>
+								<option value="2">2x</option>
+								<option value="3">3x</option>
+							</select>
+						</div>
+					</li>
+				</List>
+				<Button onClick={askForFrames}>
+					<div className="icon">
+						<FigmaLogo />
+					</div>
+					<div>Update Elements</div>
+					<div className="icon">
+						<BlenderLogo />
+					</div>
+				</Button>
+			</div>
 
-      <FooterElement />
-    </Wrapper>
-  );
+			<FooterElement />
+		</Wrapper>
+	);
 });
 
 const List = styled.ul`

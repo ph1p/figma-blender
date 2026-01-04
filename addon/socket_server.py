@@ -7,7 +7,6 @@ import os.path
 from .properties import globalDict
 from .handle_material import handle_material
 from .errors import cannot_start_server, element_not_found, folder_not_writeable
-from .async_loop import *
 
 
 def get_element(id):
@@ -15,6 +14,10 @@ def get_element(id):
         loop = asyncio.get_event_loop()
 
         if not globalDict["connected"] is None:
+            globalDict["is_loading"] = True
+            if bpy.context.area:
+                bpy.context.area.tag_redraw()
+
             loop.run_until_complete(globalDict["connected"].send(json.dumps({
                 "event": "get_element",
                 "id": id
@@ -26,15 +29,18 @@ def get_element(id):
 
 
 async def websocket_handler(websocket):
+    print(f"Figma addon: New WebSocket connection from {websocket.remote_address}")
     globalDict["plugin_connected"] = True
     if bpy.context.area:
         bpy.context.area.tag_redraw()
 
     if not globalDict["connected"] is None:
+        print("Figma addon: Rejecting connection - already connected")
         await websocket.send(json.dumps({
             "event": "not_allowed",
         }))
     else:
+        print("Figma addon: Accepting connection")
         globalDict["connected"] = websocket
 
         image_bytes = b''
@@ -84,20 +90,37 @@ async def websocket_handler(websocket):
 
 
 async def server():
-    websockets = importlib.import_module("websockets")
+    try:
+        websockets = importlib.import_module("websockets")
+    except ImportError as e:
+        print(f"Figma addon: Failed to import websockets: {e}")
+        globalDict["is_started"] = False
+        if bpy.context.window_manager:
+            bpy.context.window_manager.popup_menu(
+                cannot_start_server, title="Error", icon='ERROR')
+        return
 
     try:
+        print("Figma addon: Starting websocket server on localhost:1410")
         async with websockets.serve(websocket_handler, "localhost", 1410):
-            await asyncio.Future()
-    except:
-        bpy.context.window_manager.popup_menu(
-            cannot_start_server, title="Error", icon='ERROR')
-
-        globalDict["server_task"].cancel()
-        asyncio.get_event_loop().stop()
+            print("Figma addon: Websocket server started successfully")
+            await asyncio.Future()  # Run forever until cancelled
+    except asyncio.CancelledError:
+        print("Figma addon: Server task cancelled")
+    except Exception as e:
+        print(f"Figma addon: Server error: {type(e).__name__}: {e}")
         globalDict["is_started"] = False
 
-    globalDict["connected"] = None
+        if bpy.context.window_manager:
+            try:
+                bpy.context.window_manager.popup_menu(
+                    cannot_start_server, title="Error", icon='ERROR')
+            except:
+                pass
+    finally:
+        print("Figma addon: Server stopped")
+        globalDict["connected"] = None
+        globalDict["is_started"] = False
 
-    if not bpy.context.area is None:
-        bpy.context.area.tag_redraw()
+        if bpy.context.area:
+            bpy.context.area.tag_redraw()

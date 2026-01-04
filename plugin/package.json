@@ -1,83 +1,81 @@
 {
-  "name": "blender",
-  "version": "0.0.1",
-  "description": "",
-  "scripts": {
-    "build": "NODE_ENV=production webpack --mode=production && rm ./dist/Blender connect/ui.js  ./dist/Blender connect/ui.js.LICENSE.txt",
-    "lint": "eslint  --ext .tsx,.ts,.json,.js src/ --fix",
-    "start": "DEBUG=* webpack --watch"
-  },
-  "author": "Philip Stapelfeldt <me@ph1p.dev>",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ph1p/figma-blender.git"
-  },
-  "bugs": {
-    "url": "https://github.com/ph1p/figma-blender/issues"
-  },
-  "prettier": {
-    "singleQuote": true
-  },
-  "license": "ISC",
-  "dependencies": {
-    "buffer": "^6.0.3",
-    "mobx": "^6.12.0",
-    "mobx-react-lite": "^4.0.5",
-    "process": "^0.11.10",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.2",
-    "slugify": "^1.6.6",
-    "stream-browserify": "^3.0.0",
-    "styled-components": "^6.1.8"
-  },
-  "devDependencies": {
-    "@figma/plugin-typings": "^1.88.0",
-    "@types/node": "^20.11.24",
-    "@types/react": "^18.2.61",
-    "@types/react-dom": "^18.2.19",
-    "@types/styled-components": "^5.1.34",
-    "@typescript-eslint/eslint-plugin": "^7.1.1",
-    "@typescript-eslint/parser": "^7.1.1",
-    "create-file-webpack": "^1.0.2",
-    "css-loader": "^6.10.0",
-    "esbuild-loader": "^4.0.3",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-import-resolver-node": "^0.3.9",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-prefer-arrow": "^1.2.3",
-    "eslint-plugin-prettier": "^5.1.3",
-    "eslint-plugin-react": "^7.34.0",
-    "eslint-plugin-react-app": "^6.2.2",
-    "html-webpack-plugin": "^5.6.0",
-    "prettier": "^3.2.5",
-    "style-loader": "^3.3.4",
-    "terser-webpack-plugin": "v5.3.10",
-    "tsconfig-paths-webpack-plugin": "^4.1.0",
-    "typescript": "^5.3.3",
-    "url-loader": "^4.1.1",
-    "webpack": "^5.90.3",
-    "webpack-bundle-analyzer": "^4.10.1",
-    "webpack-cli": "^5.1.4"
-  },
-  "figmaPlugin": {
-    "name": "Blender connect",
-    "id": "1095047912165244715",
-    "api": "1.0.0",
-    "main": "code.js",
-    "ui": "ui.html",
-    "enableProposedApi": false,
-    "editorType": [
-      "figma"
-    ],
-    "networkAccess": {
-      "allowedDomains": ["ws://localhost:1410"],
-      "reasoning": "Blender Server"
-    },
-    "documentAccess": "dynamic-page"
-  },
-  "resolutions": {
-    "bn.js": "5.2.0"
-  }
+	"name": "blender",
+	"version": "0.0.1",
+	"description": "",
+	"scripts": {
+		"dev": "vite",
+
+		"watch": "run-p watch:*",
+		"watch:ui": "pnpm build:ui --watch --mode=development",
+		"watch:code": "pnpm build:code --watch --mode=development",
+
+		"build": "run-s build:*",
+		"build:ui": "vite build -c ./vite.config.ui.ts",
+		"build:code": "vite build -c ./vite.config.code.ts",
+
+		"lint": "biome lint ./src",
+		"format": "biome check --fix && biome format --fix"
+	},
+	"author": "Philip Stapelfeldt <me@ph1p.dev>",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ph1p/figma-blender.git"
+	},
+	"bugs": {
+		"url": "https://github.com/ph1p/figma-blender/issues"
+	},
+	"prettier": {
+		"singleQuote": true
+	},
+	"license": "ISC",
+	"dependencies": {
+		"mobx": "^6.15.0",
+		"mobx-react-lite": "^4.1.1",
+		"react": "^19.2.3",
+		"react-dom": "^19.2.3",
+		"react-router-dom": "^7.11.0",
+		"slugify": "^1.6.6",
+		"styled-components": "^6.1.19"
+	},
+	"devDependencies": {
+		"npm-run-all": "^4.1.5",
+		"@biomejs/biome": "2.3.10",
+		"@figma/plugin-typings": "^1.121.0",
+		"@types/node": "^25.0.3",
+		"@types/react": "^19.2.7",
+		"@types/react-dom": "^19.2.3",
+		"@types/styled-components": "^5.1.36",
+		"@vitejs/plugin-react-swc": "^4.2.2",
+		"prettier": "^3.7.4",
+		"style-loader": "^4.0.0",
+		"terser-webpack-plugin": "v5.3.16",
+		"tsconfig-paths-webpack-plugin": "^4.2.0",
+		"typescript": "^5.9.3",
+		"url-loader": "^4.1.1",
+		"vite": "8.0.0-beta.5",
+		"vite-plugin-singlefile": "^2.3.0"
+	},
+	"figma": {
+		"name": "Blender connect",
+		"id": "1095047912165244715",
+		"api": "1.0.0",
+		"main": "code.js",
+		"ui": "index.html",
+		"enableProposedApi": false,
+		"editorType": [
+			"figma"
+		],
+		"networkAccess": {
+			"allowedDomains": [
+				"ws://localhost:1410",
+				"https://fonts.googleapis.com",
+				"https://fonts.gstatic.com"
+			],
+			"reasoning": "Blender Server and Google Fonts access"
+		},
+		"documentAccess": "dynamic-page"
+	},
+	"resolutions": {
+		"bn.js": "5.2.0"
+	}
 }

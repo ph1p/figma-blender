@@ -15,7 +15,7 @@ https://user-images.githubusercontent.com/15351728/163018521-d6d704bb-f280-499c-
 Search the "Blender connect" plugin in figma and install it.
 Download the "Figma Blender Addon" from here: https://ph1p.gumroad.com/l/figma-blender-addon and install it (Edit -> Preferences -> Addons -> Install...)
 
-- Start Figma Plugin (https://www.figma.com/community/plugin/1095047912165244715/Blender-connect) 
+- Start Figma Plugin (https://www.figma.com/community/plugin/1095047912165244715/Blender-connect)
 - Start Blender Addon. **Blender may freeze for a few seconds the first time, as dependencies are installed in the background.**
 - Press `n` in Blender to open the sidebar
 - Click on `Figma` and choose a folder for your textures
@@ -64,3 +64,25 @@ After that you only need to import it into figma under the Plugin section.
 I developed the plugin mainly with VSCode and this plugin https://marketplace.visualstudio.com/items?itemName=JacquesLucke.blender-development
 
 You have to open the **addon** folder with VSCode and run the blender VSCode plugin.
+
+### Testing the WebSocket Server
+
+The `addon/test_server.py` script can be used to verify that the WebSocket server is running correctly in Blender.
+
+To test the server:
+
+1. Start Blender and enable the Figma addon
+2. Start the server from the Figma panel in Blender
+3. Run the test script:
+
+```bash
+python3 addon/test_server.py
+```
+
+The test script will:
+- Check if port 1410 is listening
+- Establish a WebSocket connection
+- Verify server responses
+- Report the connection status
+
+This is useful for debugging connection issues between Blender and the Figma plugin.
