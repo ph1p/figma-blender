@@ -5,6 +5,7 @@ from bpy.props import EnumProperty, StringProperty
 
 globalDict = {
     "server_task": None,
+    "ws_server": None,
     "connected": None,
     "is_started": False,
     "is_loading": False,
