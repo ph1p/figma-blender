@@ -1,0 +1,6 @@
+# @swc/core compiles a native binary in its postinstall script. pnpm >= 10 blocks
+# unapproved build scripts, and that block makes every `pnpm <script>` fail with
+# ERR_PNPM_IGNORED_BUILDS -- including `pnpm build`. Approving it here keeps a
+# fresh clone working with a plain `pnpm install`.
+allowBuilds:
+  '@swc/core': true
