@@ -51,9 +51,9 @@ def handle_material(data, name, width, height):
                     bsdf.inputs["Base Color"], texImage.outputs["Color"]
                 )
 
-                if "BSDF Alpha" in bsdf.inputs and "Alpha" in texImage.outputs:
+                if "Alpha" in bsdf.inputs and "Alpha" in texImage.outputs:
                     mat.node_tree.links.new(
-                        bsdf.inputs["BSDF Alpha"], texImage.outputs["Alpha"]
+                        bsdf.inputs["Alpha"], texImage.outputs["Alpha"]
                     )
         else:
             if not texImage.image is None:
