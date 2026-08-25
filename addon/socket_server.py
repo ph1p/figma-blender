@@ -30,9 +30,6 @@ def get_element(id):
 
 async def websocket_handler(websocket):
     print(f"Figma addon: New WebSocket connection from {websocket.remote_address}")
-    globalDict["plugin_connected"] = True
-    if bpy.context.area:
-        bpy.context.area.tag_redraw()
 
     if not globalDict["connected"] is None:
         print("Figma addon: Rejecting connection - already connected")
@@ -42,6 +39,10 @@ async def websocket_handler(websocket):
     else:
         print("Figma addon: Accepting connection")
         globalDict["connected"] = websocket
+        globalDict["plugin_connected"] = True
+
+        if bpy.context.area:
+            bpy.context.area.tag_redraw()
 
         image_bytes = b''
 
@@ -82,11 +83,13 @@ async def websocket_handler(websocket):
 
     await websocket.wait_closed()
 
-    globalDict["connected"] = None
-    globalDict["plugin_connected"] = False
+    # Only the accepted connection owns this state.
+    if globalDict["connected"] is websocket:
+        globalDict["connected"] = None
+        globalDict["plugin_connected"] = False
 
-    if bpy.context.area:
-        bpy.context.area.tag_redraw()
+        if bpy.context.area:
+            bpy.context.area.tag_redraw()
 
 
 async def server():
