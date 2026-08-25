@@ -34,7 +34,7 @@ class FIGMA_OT_Server(Operator):
             globalDict["is_started"] = True
 
             if not bpy.app.timers.is_registered(process_asyncio_events):
-                bpy.app.timers.register(process_asyncio_events, first_interval=0.1)
+                bpy.app.timers.register(process_asyncio_events, first_interval=0.1, persistent=True)
 
             print(f"Figma addon: Server task created: {globalDict['server_task']}")
 

@@ -65,7 +65,11 @@ def setup_asyncio():
         asyncio.set_event_loop(loop)
 
 def process_asyncio_events():
-    """Process asyncio events on a timer."""
+    """Process asyncio events on a timer.
+
+    Register with persistent=True. Blender drops non-persistent timers when a
+    file is loaded, which would leave the socket open with nothing pumping it.
+    """
     from .properties import globalDict
 
     if globalDict.get("is_started", False):
@@ -115,7 +119,7 @@ def auto_start_server_if_enabled():
             globalDict["is_started"] = True
 
             if not bpy.app.timers.is_registered(process_asyncio_events):
-                bpy.app.timers.register(process_asyncio_events, first_interval=0.1)
+                bpy.app.timers.register(process_asyncio_events, first_interval=0.1, persistent=True)
 
             print(f"Figma addon: Server auto-started successfully")
 
@@ -130,7 +134,7 @@ def register():
     Scene.figma = PointerProperty(type=FigmaProperties)
 
     check_deps_on_startup()
-    bpy.app.timers.register(auto_start_server_if_enabled, first_interval=1.0)
+    bpy.app.timers.register(auto_start_server_if_enabled, first_interval=1.0, persistent=True)
 
 def unregister():
     from .properties import globalDict
