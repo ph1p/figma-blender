@@ -30,34 +30,36 @@ Download the "Figma Blender Addon" from here: https://ph1p.gumroad.com/l/figma-b
 
 ### My Plugin does no start!
 
-The plugin may not have been able to install the `websockets` dependency. So you can also do this manually via the command line. You have to replace the Blender-Version (`2.92`) and maybe the python executable (`python3.7m`).
+The addon may not have been able to install the `websockets` dependency. You can also do this manually via the command line, using **Blender's own Python** rather than a system Python. Replace the Blender version (`5.2`) and the Python version (`python3.13`) in the paths if yours differ.
 
 **MacOS**
 
 ```bash
- /Applications/Blender.app/Contents/Resources/2.92/python/bin/python3.7m -m pip install websockets
+/Applications/Blender.app/Contents/Resources/5.2/python/bin/python3.13 -m pip install --user websockets
 ```
 
 **Windows**
 
-Run `cmd` and run this with admin rights.
-
 ```bash
-"C:\Program Files\Blender Foundation\Blender 3.1\3.1\python\bin\python.exe" -m pip install websockets"
+"C:\Program Files\Blender Foundation\Blender 5.2\5.2\python\bin\python.exe" -m pip install --user websockets
 ```
+
+`--user` installs into your per-user site-packages, so no admin rights are needed — Blender's own `site-packages` lives under the read-only installation directory. The addon adds the user directory to `sys.path` on startup. Restart Blender once the install finishes.
 
 ## Development
 
 ### Figma
 
-Just go into the **plugin** folder and run the following commands:
+The plugin is built with [pnpm](https://pnpm.io/). Go into the **plugin** folder and run the following commands:
 
 ```bash
-yarn install
-yarn start # runs dev server
+pnpm install
+pnpm watch # rebuilds dist/ on every change
 ```
 
-After that you only need to import it into figma under the Plugin section.
+After that, import it into the Figma **desktop** app under _Plugins → Development → Import plugin from manifest…_ and select `plugin/dist/manifest.json`. Re-run the plugin in Figma to pick up a rebuild.
+
+Use `pnpm build` for a one-off production build.
 
 ### Blender
 
@@ -73,10 +75,14 @@ To test the server:
 
 1. Start Blender and enable the Figma addon
 2. Start the server from the Figma panel in Blender
-3. Run the test script:
+3. Run the test script with a Python that has `websockets` available. Blender's bundled interpreter always does, so it is the safest choice:
 
 ```bash
-python3 addon/test_server.py
+# MacOS
+/Applications/Blender.app/Contents/Resources/5.2/python/bin/python3.13 addon/test_server.py
+
+# Windows
+"C:\Program Files\Blender Foundation\Blender 5.2\5.2\python\bin\python.exe" addon/test_server.py
 ```
 
 The test script will:
