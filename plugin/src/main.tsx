@@ -107,6 +107,19 @@ const App = observer(() => {
 		}
 	}, [socket, store]);
 
+	// Figma fires no event when a frame is added, renamed or deleted, so ask the
+	// main thread to re-check while we are connected.
+	useEffect(() => {
+		if (!socket) return;
+
+		const interval = setInterval(
+			() => EventEmitter.emit("refresh elements"),
+			2000,
+		);
+
+		return () => clearInterval(interval);
+	}, [socket]);
+
 	return (
 		<AppWrapper>
 			<SocketProvider socket={socket}>
