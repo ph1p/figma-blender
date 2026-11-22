@@ -36,11 +36,28 @@ const getFrame = async ({ id, scaling }) => {
 	return null;
 };
 
-const sendData = () =>
+const snapshot = (elements: { id: string; name: string }[]) =>
+	JSON.stringify([figma.currentPage.name, elements]);
+
+let lastSnapshot = "";
+
+const sendData = () => {
+	const elements = getElements();
+	lastSnapshot = snapshot(elements);
+
 	EventEmitter.emit("data", {
-		elements: getElements(),
+		elements,
 		page_name: figma.currentPage.name,
 	});
+};
+
+// The UI polls this. Sending only on an actual change keeps Blender's element
+// list from being rebuilt every tick.
+EventEmitter.on("refresh elements", () => {
+	if (snapshot(getElements()) !== lastSnapshot) {
+		sendData();
+	}
+});
 
 EventEmitter.answer("frame", async (data) => {
 	return getFrame(data);
