@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write # tags, release commit, GitHub release
+  issues: write # semantic-release comments on released issues
+  pull-requests: write # ...and pull requests
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  # Oldest supported Blender, so the build also proves the manifest works there.
+  BLENDER_VERSION: "4.2.0"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Cache Blender
+        id: blender-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/blender
+          key: blender-${{ env.BLENDER_VERSION }}-linux-x64
+
+      - name: Download Blender
+        if: steps.blender-cache.outputs.cache-hit != 'true'
+        run: |
+          minor="${BLENDER_VERSION%.*}"
+          mkdir -p ~/blender
+          curl -fsSL "https://download.blender.org/release/Blender${minor}/blender-${BLENDER_VERSION}-linux-x64.tar.xz" \
+            | tar -xJ -C ~/blender --strip-components=1
+
+      - name: Install Blender runtime libraries
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libxi6 libxxf86vm1 libxfixes3 libxrender1 libxkbcommon0 libsm6 libgl1 libegl1
+
+      - run: npm ci
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          export BLENDER="$HOME/blender/blender"
+          npx semantic-release
