@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/ph1p/figma-blender/compare/v1.0.0...v1.0.1) (2026-11-22)
+
+
+### Bug Fixes
+
+* **addon:** show server as starting until the socket is bound ([7323aae](https://github.com/ph1p/figma-blender/commit/7323aae1a6d312272ffaaaad40de6121249dc2a7))
+
 # 1.0.0 (2026-11-22)
 
 

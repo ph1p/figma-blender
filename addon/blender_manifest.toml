@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "figma_connect"
-version = "1.0.0"
+version = "1.0.1"
 name = "Figma Connect"
 tagline = "Load Figma frames as textures into your scene"
 maintainer = "Philip Stapelfeldt"
