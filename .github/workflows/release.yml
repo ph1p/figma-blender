@@ -22,19 +22,19 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
 
       - name: Cache Blender
         id: blender-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/blender
           key: blender-${{ env.BLENDER_VERSION }}-linux-x64
