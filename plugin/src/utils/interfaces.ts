@@ -4,3 +4,14 @@ export enum ConnectionEnum {
 	ERROR = "ERROR",
 	CONNECTING = "CONNECTING",
 }
+
+export interface FigmaElement {
+	id: string;
+	name: string;
+}
+
+export interface FigmaFrame extends FigmaElement {
+	width: number;
+	height: number;
+	data?: Uint8Array;
+}

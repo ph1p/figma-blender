@@ -19,7 +19,7 @@
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"noFallthroughCasesInSwitch": true,
-		"typeRoots": ["./node_modules/@figma"]
+		"types": ["vite/client", "@figma/plugin-typings"]
 	},
 	"include": ["src"],
 	"references": [{ "path": "./tsconfig.node.json" }]

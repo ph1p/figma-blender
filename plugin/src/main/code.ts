@@ -1,4 +1,5 @@
 import EventEmitter from "../shared/EventEmitter";
+import type { FigmaElement, FigmaFrame } from "../utils/interfaces";
 
 figma.showUI(__html__, {
 	width: 240,
@@ -12,7 +13,13 @@ const getElements = () =>
 		name: node.name.substring(0, 20),
 	}));
 
-const getFrame = async ({ id, scaling }) => {
+const getFrame = async ({
+	id,
+	scaling,
+}: {
+	id: string;
+	scaling?: number;
+}): Promise<FigmaFrame | null> => {
 	try {
 		const node = await figma.getNodeByIdAsync(id);
 
@@ -36,7 +43,7 @@ const getFrame = async ({ id, scaling }) => {
 	return null;
 };
 
-const snapshot = (elements: { id: string; name: string }[]) =>
+const snapshot = (elements: FigmaElement[]) =>
 	JSON.stringify([figma.currentPage.name, elements]);
 
 let lastSnapshot = "";
@@ -59,9 +66,7 @@ EventEmitter.on("refresh elements", () => {
 	}
 });
 
-EventEmitter.answer("frame", async (data) => {
-	return getFrame(data);
-});
+EventEmitter.answer("frame", getFrame);
 
 EventEmitter.on("get elements", () => {
 	figma.notify("Send elements to Blender 🛫");

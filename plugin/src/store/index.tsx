@@ -1,7 +1,7 @@
 import { makeAutoObservable } from "mobx";
-import React from "react";
+import React, { type ReactNode } from "react";
 
-import { ConnectionEnum } from "../utils/interfaces";
+import { ConnectionEnum, type FigmaElement } from "../utils/interfaces";
 
 export class RootStore {
 	constructor() {
@@ -11,7 +11,7 @@ export class RootStore {
 	url = "ws://localhost:1410";
 	status = ConnectionEnum.CONNECTING;
 	notAllowed = false;
-	elements = [];
+	elements: FigmaElement[] = [];
 	page_name = "";
 	scaling = 1;
 
@@ -23,15 +23,15 @@ export class RootStore {
 		this.notAllowed = true;
 	}
 
-	setElements(elements) {
+	setElements(elements: FigmaElement[]) {
 		this.elements = elements;
 	}
 
-	setPageName(page_name) {
+	setPageName(page_name: string) {
 		this.page_name = page_name;
 	}
 
-	setScaling(scaling) {
+	setScaling(scaling: number) {
 		this.scaling = scaling;
 	}
 }
@@ -40,7 +40,7 @@ export const rootStore = new RootStore();
 
 const StoreContext = React.createContext<RootStore | null>(null);
 
-export const StoreProvider = ({ children }) => (
+export const StoreProvider = ({ children }: { children: ReactNode }) => (
 	<StoreContext.Provider value={rootStore}>{children}</StoreContext.Provider>
 );
 

@@ -3,4 +3,6 @@
 # ERR_PNPM_IGNORED_BUILDS -- including `pnpm build`. Approving it here keeps a
 # fresh clone working with a plain `pnpm install`.
 allowBuilds:
-  '@swc/core': true
+  "@swc/core": true
+minimumReleaseAgeExclude:
+  - mobx-react-lite@5.1.4

@@ -1,80 +1,81 @@
-import React, { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+
 import { useStore } from "../store";
 import { ConnectionEnum } from "./interfaces";
 
-export const useWebSocket = ({ url, onmessage }) => {
+type MessageHandler = (event: MessageEvent<string>, ws: WebSocket) => void;
+
+export const useWebSocket = ({
+	url,
+	onmessage,
+}: {
+	url: string;
+	onmessage: MessageHandler;
+}) => {
 	const store = useStore();
-	const [socket, _setSocket] = React.useState<WebSocket>(null);
+	const [socket, setSocket] = useState<WebSocket | null>(null);
+	const onmessageRef = useRef(onmessage);
 
-	const socketRef = React.useRef(socket);
-	const onmessageRef = React.useRef(onmessage);
-
-	// Keep the ref updated with the latest onmessage callback
+	// Keep the latest onmessage callback without reconnecting
 	useEffect(() => {
 		onmessageRef.current = onmessage;
 	}, [onmessage]);
 
-	const setSocket = React.useCallback((data) => {
-		socketRef.current = data;
-		_setSocket(data);
-	}, []);
-
 	useEffect(() => {
-		let timeout: NodeJS.Timeout | undefined;
-		let ws: WebSocket | null = null;
-		let shouldReconnect = true;
+		let timeout: ReturnType<typeof setTimeout> | undefined;
+		// Aborting removes every listener and prevents reconnection on cleanup
+		const controller = new AbortController();
+		const { signal } = controller;
 
 		const connect = () => {
-			// Don't connect if we're cleaning up
-			if (!shouldReconnect) return;
+			if (signal.aborted) return;
 
-			ws = new WebSocket(url);
+			const ws = new WebSocket(url);
 
-			ws.onmessage = (e) => onmessageRef.current(e, ws);
+			ws.addEventListener("message", (e) => onmessageRef.current(e, ws), {
+				signal,
+			});
 
-			ws.onopen = () => {
-				store.setStatus(ConnectionEnum.CONNECTED);
-				setSocket(ws);
-				clearTimeout(timeout);
-			};
+			ws.addEventListener(
+				"open",
+				() => {
+					store.setStatus(ConnectionEnum.CONNECTED);
+					setSocket(ws);
+					clearTimeout(timeout);
+				},
+				{ signal },
+			);
 
-			ws.onclose = () => {
-				// Only reconnect if we should and we're not cleaning up
-				if (!shouldReconnect) return;
+			ws.addEventListener(
+				"close",
+				() => {
+					store.setStatus(ConnectionEnum.CONNECTING);
+					setSocket(null);
+					timeout = setTimeout(connect, 1000);
+				},
+				{ signal },
+			);
 
-				store.setStatus(ConnectionEnum.CONNECTING);
-				setSocket(null);
-				timeout = setTimeout(() => {
-					if (shouldReconnect) {
-						connect();
-					}
-				}, 1000);
-			};
+			ws.addEventListener(
+				"error",
+				() => {
+					store.setStatus(ConnectionEnum.ERROR);
+					setSocket(null);
+					ws.close();
+				},
+				{ signal },
+			);
 
-			ws.onerror = () => {
-				store.setStatus(ConnectionEnum.ERROR);
-				setSocket(null);
-				ws?.close();
-			};
+			signal.addEventListener("abort", () => ws.close());
 		};
 
 		connect();
 
-		// Cleanup function to close connection and prevent reconnection
 		return () => {
-			shouldReconnect = false;
+			controller.abort();
 			clearTimeout(timeout);
-			if (ws) {
-				ws.onclose = null; // Prevent reconnection
-				ws.onerror = null;
-				ws.onmessage = null;
-				ws.onopen = null;
-				ws.close();
-			}
 		};
-	}, [setSocket, store.setStatus, url]);
+	}, [store, url]);
 
-	return {
-		socket: socketRef.current,
-	};
+	return { socket };
 };

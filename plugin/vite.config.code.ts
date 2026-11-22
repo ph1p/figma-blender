@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+
 import { defineConfig, type PluginOption } from "vite";
 import { viteSingleFile } from "vite-plugin-singlefile";
 
