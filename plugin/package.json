@@ -74,8 +74,5 @@
 			"reasoning": "Blender Server and Google Fonts access"
 		},
 		"documentAccess": "dynamic-page"
-	},
-	"resolutions": {
-		"bn.js": "5.2.0"
 	}
 }
