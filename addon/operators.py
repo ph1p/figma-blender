@@ -2,7 +2,7 @@ import bpy
 import asyncio
 import os
 from bpy.types import Operator
-from .socket_server import server, get_element
+from .socket_server import server, get_element, stop_server
 from .properties import globalDict
 
 class FIGMA_OT_Server(Operator):
@@ -43,17 +43,7 @@ class FIGMA_OT_Server(Operator):
             return {'FINISHED'}
         else:
             print("Figma addon: Stopping server (manual)")
-            if globalDict.get("server_task"):
-                try:
-                    globalDict["server_task"].cancel()
-                    print("Figma addon: Server task cancelled")
-                except Exception as e:
-                    print(f"Figma addon: Error cancelling task: {e}")
-
-            globalDict["is_started"] = False
-            globalDict["connected"] = None
-            globalDict["plugin_connected"] = False
-            globalDict["server_task"] = None
+            stop_server()
 
             if context.area:
                 context.area.tag_redraw()

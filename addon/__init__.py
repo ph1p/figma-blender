@@ -133,13 +133,10 @@ def register():
     bpy.app.timers.register(auto_start_server_if_enabled, first_interval=1.0)
 
 def unregister():
-    from .properties import globalDict
+    from .socket_server import stop_server
 
-    if globalDict.get("server_task"):
-        try:
-            globalDict["server_task"].cancel()
-        except:
-            pass
+    # Disabling must release port 1410, or re-enabling cannot bind.
+    stop_server()
 
     if bpy.app.timers.is_registered(process_asyncio_events):
         bpy.app.timers.unregister(process_asyncio_events)
