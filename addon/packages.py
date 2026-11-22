@@ -98,7 +98,7 @@ def install_threaded():
             for area in window.screen.areas:
                 if area.type == 'VIEW_3D':
                     area.tag_redraw()
-    except:
+    except Exception:
         pass
 
 

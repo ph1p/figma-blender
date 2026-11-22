@@ -28,12 +28,22 @@ const askForFrames = () => EventEmitter.emit("get elements");
 const Home: FunctionComponent = observer(() => {
 	const store = useStore();
 
-	if (store.status === ConnectionEnum.CONNECTING || store.notAllowed) {
+	if (
+		store.status === ConnectionEnum.CONNECTING ||
+		store.notAllowed ||
+		store.addonTooNew
+	) {
 		return (
 			<Wrapper>
 				<Loader>
 					<p>
-						{store.notAllowed ? (
+						{store.addonTooNew ? (
+							<>
+								Blender addon is newer
+								<br />
+								than this plugin, please update it
+							</>
+						) : store.notAllowed ? (
 							<>
 								One connected plugin
 								<br />
@@ -43,7 +53,7 @@ const Home: FunctionComponent = observer(() => {
 							"Waiting for Blender..."
 						)}
 					</p>
-					<Progress />
+					{!store.addonTooNew && <Progress />}
 				</Loader>
 				<FooterElement />
 			</Wrapper>

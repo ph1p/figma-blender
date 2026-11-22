@@ -1,129 +1,134 @@
-import bmesh
-import bpy
 import os
 import tempfile
+
+import bmesh
+import bpy
 
 from .properties import globalDict
 
 
+def safe_file_name(name):
+    """Keep the name inside the texture folder.
+
+    The name comes over the socket, so "../" or an absolute path must not let
+    it write anywhere else.
+    """
+    return os.path.basename(str(name).replace("\\", "/")).strip(". ")
+
+
+def find_material_index(obj, name):
+    for index, material in enumerate(obj.data.materials):
+        if material is not None and material.name == name:
+            return index
+    return -1
+
+
+def ensure_image_node(mat, name, file_path):
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+
+    bsdf = nodes.get("Principled BSDF")
+    if bsdf is None:
+        bsdf = nodes.new(type="ShaderNodeBsdfPrincipled")
+
+    tex_image = nodes.get(name)
+
+    if tex_image is None:
+        tex_image = nodes.new("ShaderNodeTexImage")
+        tex_image.label = name
+        tex_image.name = name
+        tex_image.image = bpy.data.images.load(file_path)
+
+        links.new(bsdf.inputs["Base Color"], tex_image.outputs["Color"])
+
+        if "Alpha" in bsdf.inputs and "Alpha" in tex_image.outputs:
+            links.new(bsdf.inputs["Alpha"], tex_image.outputs["Alpha"])
+    elif tex_image.image is None:
+        tex_image.image = bpy.data.images.load(file_path)
+    else:
+        # Point the existing image at the new file: the folder may have changed,
+        # and Blender may have renamed the datablock (e.g. "name.png.001").
+        tex_image.image.filepath = file_path
+        tex_image.image.reload()
+
+
+def apply_to_objects(mat, name, width, height):
+    selected = bpy.context.view_layer.objects.selected
+
+    if len(selected) == 0:
+        bpy.ops.mesh.primitive_plane_add()
+        ob = bpy.context.view_layer.objects.active
+        ob.scale[0] = 1
+        ob.scale[1] = height / width
+        ob.data.materials.append(mat)
+        return
+
+    for ob in selected:
+        if not hasattr(ob.data, "materials"):
+            print(f"Figma addon: '{ob.name}' cannot have materials, skipped")
+            continue
+
+        index = find_material_index(ob, name)
+        if index >= 0:
+            ob.data.materials[index] = mat
+        else:
+            ob.data.materials.append(mat)
+
+
+def apply_to_selected_faces(name):
+    for obj in bpy.context.objects_in_mode:
+        index = find_material_index(obj, name)
+        if index < 0:
+            continue
+
+        bm = bmesh.from_edit_mesh(obj.data)
+        for face in bm.faces:
+            if face.select:
+                face.material_index = index
+        bmesh.update_edit_mesh(obj.data)
+
+
 def handle_material(data, name, width, height):
     figma = bpy.context.scene.figma
+    name = safe_file_name(name)
 
-    if not globalDict.get("is_loading", False):
-        globalDict["is_loading"] = True
-        if bpy.context.area:
-            bpy.context.area.tag_redraw()
-
-    path = tempfile.gettempdir()
-
-    if figma.folder_path:
-        path = figma.folder_path
+    globalDict["is_loading"] = True
+    if bpy.context.area:
+        bpy.context.area.tag_redraw()
 
     try:
-        mat = bpy.data.materials.get(name)
+        if not name:
+            raise ValueError("empty element name")
 
-        if mat is None:
-            mat = bpy.data.materials.new(name=name)
+        folder = figma.folder_path or tempfile.gettempdir()
+        file_path = os.path.join(folder, name + ".png")
 
-        file_path = os.path.join(path, name + ".png")
+        with open(file_path, "wb") as file:
+            file.write(data)
 
-        file = open(file_path, "wb")
-        file.write(data)
-        file.close()
-
+        mat = bpy.data.materials.get(name) or bpy.data.materials.new(name=name)
         mat.use_nodes = True
-        nodes = mat.node_tree.nodes
 
-        bsdf = nodes.get("Principled BSDF")
+        ensure_image_node(mat, name, file_path)
+        apply_to_objects(mat, name, width, height)
 
-        if not bsdf:
-            bsdf = nodes.new(type="ShaderNodeBsdfPrincipled")
-
-        texImage = nodes.get(name)
-
-        if texImage is None:
-            texImage = nodes.new("ShaderNodeTexImage")
-            texImage.label = name
-            texImage.name = name
-            texImage.image = bpy.data.images.load(file_path)
-
-            if bsdf and texImage:
-                mat.node_tree.links.new(
-                    bsdf.inputs["Base Color"], texImage.outputs["Color"]
-                )
-
-                if "Alpha" in bsdf.inputs and "Alpha" in texImage.outputs:
-                    mat.node_tree.links.new(
-                        bsdf.inputs["Alpha"], texImage.outputs["Alpha"]
-                    )
-        else:
-            if not texImage.image is None:
-                bpy.data.images[name + ".png"].reload()
-            else:
-                texImage.image = bpy.data.images.load(file_path)
-
-        if len(bpy.context.view_layer.objects.selected) == 0:
-            ob = bpy.ops.mesh.primitive_plane_add()
-            ob = bpy.context.view_layer.objects.active
-            ob.scale[0] = 1
-            ob.scale[1] = 1 / width * height
-            ob.data.materials.append(mat)
-        else:
-            for ob in bpy.context.view_layer.objects.selected:
-                try:
-                    for index, m in enumerate(ob.data.materials):
-                        if not m is None and m.name == name:
-                            ob.data.materials[index] = mat
-                            break
-                    else:
-                        ob.data.materials.append(mat)
-                except AttributeError:
-                    print("object has no material")
-
-        if bpy.context.object.mode == "EDIT":
-            for obj in bpy.context.objects_in_mode:
-                found_index = -1
-                for index, m in enumerate(obj.data.materials):
-                    if not m is None and m.name == name:
-                        found_index = index
-                        break
-
-                if found_index >= 0:
-                    bm = bmesh.from_edit_mesh(obj.data)
-                    for face in bm.faces:
-                        if face.select:
-                            face.material_index = found_index
-                            bm.verts.index_update()
-                            bmesh.update_edit_mesh(obj.data)
+        if bpy.context.mode == "EDIT_MESH":
+            apply_to_selected_faces(name)
 
         print(f"Figma addon: Texture '{name}' applied successfully")
 
     except Exception as e:
-        print(f"Figma addon: Error applying texture '{name}': {repr(e)}")
+        print(f"Figma addon: Error applying texture '{name}': {e!r}")
 
     finally:
-        del data
-
-    globalDict["is_loading"] = False
-    if bpy.context.area:
-        bpy.context.area.tag_redraw()
+        globalDict["is_loading"] = False
+        if bpy.context.area:
+            bpy.context.area.tag_redraw()
 
 
-def get_selected_faces_of_object(obj):
-    faces = []
-
-    bm = bmesh.from_edit_mesh(obj.data)
-    for f in bm.faces:
-        if f.select:
-            faces.append(f)
-
-    return faces
-
-
-def get_selected_faces():
-    faces = []
-
+def has_selected_faces():
     for obj in bpy.context.objects_in_mode:
-        faces.extend(get_selected_faces_of_object(obj))
-
-    return faces
+        bm = bmesh.from_edit_mesh(obj.data)
+        if any(face.select for face in bm.faces):
+            return True
+    return False

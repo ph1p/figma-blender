@@ -79,7 +79,7 @@ class FIGMA_OT_add_to_scene(Operator):
     def execute(self, context):
         figma = context.scene.figma
 
-        if figma.elements and figma.elements != "":
+        if figma.elements:
             element_name = None
             for item in globalDict.get("elements", []):
                 if item[0] == figma.elements:
@@ -104,22 +104,20 @@ class FIGMA_OT_InstallDeps(Operator):
     bl_label = "Install Dependencies"
 
     def execute(self, context):
-        from .packages import install
-        from .properties import globalDict
+        import threading
+        from .packages import install_threaded
 
-        self.report({'INFO'}, "Installing websockets... This may take a moment.")
+        if globalDict.get("deps_checking", False):
+            self.report({'WARNING'}, "Installation is already running")
+            return {'CANCELLED'}
+
+        # pip can take minutes; running it here would freeze Blender's UI.
+        globalDict["deps_checking"] = True
+        globalDict["deps_needs_restart"] = False
+        threading.Thread(target=install_threaded, daemon=True).start()
+
+        self.report({'INFO'}, "Installing websockets in the background, see the console for progress")
         print("Figma addon: Manual dependency installation started")
-
-        success = install()
-
-        if success:
-            globalDict["deps_installed"] = True
-            self.report({'INFO'}, "Dependencies installed! Please restart Blender.")
-            print("Figma addon: Manual installation successful - restart Blender")
-        else:
-            globalDict["deps_installed"] = False
-            self.report({'ERROR'}, "Failed to install dependencies. Check console for details.")
-            print("Figma addon: Manual installation failed - check console")
 
         return {'FINISHED'}
 
@@ -130,7 +128,6 @@ class FIGMA_OT_TestServer(Operator):
     bl_label = "Test Server Connection"
 
     def execute(self, context):
-        from .properties import globalDict
         import socket
 
         if not globalDict.get("is_started", False):
@@ -161,7 +158,7 @@ class FIGMA_OT_TestServer(Operator):
                                     print(f"Figma addon: Server task has exception: {exc}")
                                     self.report({'ERROR'}, f"Server task error: {exc}")
                                     return {'CANCELLED'}
-                            except:
+                            except Exception:
                                 pass
                     else:
                         print("Figma addon: No server task found")

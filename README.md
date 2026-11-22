@@ -69,7 +69,7 @@ You have to open the **addon** folder with VSCode and run the blender VSCode plu
 
 ### Testing the WebSocket Server
 
-The `addon/test_server.py` script can be used to verify that the WebSocket server is running correctly in Blender.
+The `scripts/test_server.py` script can be used to verify that the WebSocket server is running correctly in Blender.
 
 To test the server:
 
@@ -79,10 +79,10 @@ To test the server:
 
 ```bash
 # MacOS
-/Applications/Blender.app/Contents/Resources/5.2/python/bin/python3.13 addon/test_server.py
+/Applications/Blender.app/Contents/Resources/5.2/python/bin/python3.13 scripts/test_server.py
 
 # Windows
-"C:\Program Files\Blender Foundation\Blender 5.2\5.2\python\bin\python.exe" addon/test_server.py
+"C:\Program Files\Blender Foundation\Blender 5.2\5.2\python\bin\python.exe" scripts/test_server.py
 ```
 
 The test script will:

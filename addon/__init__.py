@@ -16,8 +16,8 @@ bl_info = {
     "name": "Figma",
     "author": "Philip Stapelfeldt",
     "location": "View3D > Panel > Figma",
-    "version": (0, 0, 4),
-    "blender": (2, 81, 0),
+    "version": (0, 0, 5),
+    "blender": (4, 2, 0),
     "description": "Import textures from figma",
     "warning": "",
     "doc_url": "https://github.com/ph1p/figma-blender",
@@ -87,7 +87,7 @@ def process_asyncio_events():
                     if area.type == 'VIEW_3D':
                         area.tag_redraw()
                         break
-        except:
+        except Exception:
             pass
 
         return 0.1  # Keep running every 0.1 seconds
@@ -121,7 +121,7 @@ def auto_start_server_if_enabled():
             if not bpy.app.timers.is_registered(process_asyncio_events):
                 bpy.app.timers.register(process_asyncio_events, first_interval=0.1, persistent=True)
 
-            print(f"Figma addon: Server auto-started successfully")
+            print("Figma addon: Server auto-started successfully")
 
     return None
 

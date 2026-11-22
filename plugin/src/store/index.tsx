@@ -1,7 +1,11 @@
 import { makeAutoObservable } from "mobx";
 import React, { type ReactNode } from "react";
 
-import { ConnectionEnum, type FigmaElement } from "../utils/interfaces";
+import {
+	ConnectionEnum,
+	PROTOCOL_VERSION,
+	type FigmaElement,
+} from "../utils/interfaces";
 
 export class RootStore {
 	constructor() {
@@ -11,6 +15,8 @@ export class RootStore {
 	url = "ws://localhost:1410";
 	status = ConnectionEnum.CONNECTING;
 	notAllowed = false;
+	/** Protocol announced by the connected addon */
+	protocol = 1;
 	elements: FigmaElement[] = [];
 	page_name = "";
 	scaling = 1;
@@ -19,8 +25,17 @@ export class RootStore {
 		this.status = status;
 	}
 
-	setNotAllowed() {
-		this.notAllowed = true;
+	setNotAllowed(notAllowed = true) {
+		this.notAllowed = notAllowed;
+	}
+
+	setProtocol(protocol: number) {
+		this.protocol = protocol;
+	}
+
+	/** Addon speaks a newer wire format than this plugin knows */
+	get addonTooNew() {
+		return this.protocol > PROTOCOL_VERSION;
 	}
 
 	setElements(elements: FigmaElement[]) {

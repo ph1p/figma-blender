@@ -1,7 +1,7 @@
 import bpy
 
 from bpy.types import Panel
-from .handle_material import get_selected_faces
+from .handle_material import has_selected_faces
 from .properties import globalDict
 
 
@@ -121,7 +121,7 @@ class FIGMA_PT_elements(FigmaPanel, Panel):
 
         figma = context.scene.figma
 
-        if not globalDict["plugin_connected"]:
+        if not globalDict.get("plugin_connected", False):
             row = layout.row()
             row.label(text="Waiting for plugin...", icon="INFO")
         else:
@@ -140,7 +140,7 @@ class FIGMA_PT_elements(FigmaPanel, Panel):
                 row = layout.row()
 
             if context.object and context.object.mode == "EDIT":
-                if len(get_selected_faces()) > 0:
+                if has_selected_faces():
                     row.operator("figma.add_to_scene", text="Add/Update face")
                 else:
                     row.label(text="Please select a face", icon="INFO")

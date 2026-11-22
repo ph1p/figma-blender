@@ -1,0 +1,17 @@
+schema_version = "1.0.0"
+
+id = "figma"
+version = "0.0.5"
+name = "Figma"
+tagline = "Import textures from Figma"
+maintainer = "Philip Stapelfeldt"
+type = "add-on"
+website = "https://github.com/ph1p/figma-blender"
+tags = ["Import-Export", "Material"]
+
+blender_version_min = "4.2.0"
+license = ["SPDX:MIT"]
+
+[permissions]
+network = "Runs a local WebSocket server for the Figma plugin"
+files = "Saves textures to the chosen folder"

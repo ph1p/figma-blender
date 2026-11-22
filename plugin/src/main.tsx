@@ -1,18 +1,16 @@
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import ReactDOM from "react-dom/client";
-import { Route, MemoryRouter as Router, Routes } from "react-router-dom";
 import slugify from "slugify";
 import styled from "styled-components";
 
 import EventEmitter from "./shared/EventEmitter";
 import { StoreProvider, useStore } from "./store";
-import { chunkData } from "./utils/helpers";
+import { chunkData, idToSuffix } from "./utils/helpers";
 import type { FigmaElement, FigmaFrame } from "./utils/interfaces";
 
 import "./style.css";
 
-import { SocketProvider } from "./utils/SocketProvider";
 import { useWebSocket } from "./utils/use-websocket";
 import HomeView from "./views/Home";
 
@@ -44,20 +42,26 @@ const App = observer(() => {
 				}
 
 				for (const chunk of chunkData(frame.data)) {
-					ws.send(
-						JSON.stringify({
-							event: "element_data",
-							type: "FILE_DATA",
-							data: Array.from(chunk),
-						}),
-					);
+					if (store.protocol >= 2) {
+						// Raw binary frames: JSON number arrays are ~4x larger.
+						// postMessage clones into a plain ArrayBuffer, never a SharedArrayBuffer.
+						ws.send(chunk as Uint8Array<ArrayBuffer>);
+					} else {
+						ws.send(
+							JSON.stringify({
+								event: "element_data",
+								type: "FILE_DATA",
+								data: Array.from(chunk),
+							}),
+						);
+					}
 				}
 
 				ws.send(
 					JSON.stringify({
 						event: "element_data",
 						type: "FILE_END",
-						name: `${slugify(frame.name)}-${(+frame.id.replace(":", "")).toString(16)}`,
+						name: `${slugify(frame.name)}-${idToSuffix(frame.id)}`,
 						width: frame.width,
 						height: frame.height,
 					}),
@@ -69,7 +73,14 @@ const App = observer(() => {
 			} else if (data.event === "not_allowed") {
 				store.setNotAllowed();
 			} else if (data.event === "init") {
-				EventEmitter.emit("get data");
+				store.setNotAllowed(false);
+				// Addons from before versioning send no protocol field.
+				store.setProtocol(
+					typeof data.protocol === "number" ? data.protocol : 1,
+				);
+				if (!store.addonTooNew) {
+					EventEmitter.emit("get data");
+				}
 			}
 		},
 	});
@@ -97,10 +108,7 @@ const App = observer(() => {
 				},
 			);
 
-			return () => {
-				cleanup();
-				EventEmitter.remove("frames");
-			};
+			return cleanup;
 		}
 	}, [socket, store]);
 
@@ -119,13 +127,7 @@ const App = observer(() => {
 
 	return (
 		<AppWrapper>
-			<SocketProvider socket={socket}>
-				<Router>
-					<Routes>
-						<Route path="/" element={<HomeView />} />
-					</Routes>
-				</Router>
-			</SocketProvider>
+			<HomeView />
 		</AppWrapper>
 	);
 });

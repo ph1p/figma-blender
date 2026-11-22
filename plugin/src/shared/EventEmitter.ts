@@ -5,6 +5,8 @@ type Listener<T = any> = (data: T, emit: Emit) => void;
 interface PluginMessage {
 	name: string;
 	data: unknown;
+	/** Set on "ask" requests and echoed back by the answer */
+	requestId?: number;
 }
 
 /**
@@ -12,38 +14,53 @@ interface PluginMessage {
  */
 class EventEmitter {
 	messageEvent = new Map<string, Listener>();
-	emit: Emit;
+	// Keyed by request id, so concurrent asks for the same name cannot steal
+	// each other's answers.
+	pending = new Map<number, (data: unknown) => void>();
+	nextRequestId = 1;
+	post: (message: PluginMessage) => void;
 
 	constructor() {
 		if (typeof figma !== "undefined") {
 			// MAIN PROCESS
-			this.emit = (name, data) => {
-				figma.ui.postMessage({ name, data: data || null }, { origin: "*" });
-			};
+			this.post = (message) => figma.ui.postMessage(message, { origin: "*" });
 
-			figma.ui.on("message", (event: PluginMessage) => {
-				this.messageEvent.get(event.name)?.(event.data, this.emit);
-			});
+			figma.ui.on("message", (message: PluginMessage) => this.receive(message));
 		} else {
 			// RENDERER PROCESS
+			this.post = (message) =>
+				parent.postMessage({ pluginMessage: message }, "*");
+
 			window.addEventListener(
 				"message",
 				(event: MessageEvent<{ pluginMessage?: PluginMessage }>) => {
-					const message = event.data.pluginMessage;
-					if (message) {
-						this.messageEvent.get(message.name)?.(message.data, this.emit);
+					if (event.data.pluginMessage) {
+						this.receive(event.data.pluginMessage);
 					}
 				},
 			);
-
-			this.emit = (name = "", data = {}) => {
-				parent.postMessage(
-					{ pluginMessage: { name, data: data || null } },
-					"*",
-				);
-			};
 		}
 	}
+
+	private receive({ name, data, requestId }: PluginMessage) {
+		const resolve =
+			requestId === undefined ? undefined : this.pending.get(requestId);
+
+		if (resolve) {
+			this.pending.delete(requestId!);
+			resolve(data);
+			return;
+		}
+
+		const reply: Emit = (replyName, replyData) =>
+			this.post({ name: replyName, data: replyData ?? null, requestId });
+
+		this.messageEvent.get(name)?.(data, reply);
+	}
+
+	emit: Emit = (name, data) => {
+		this.post({ name, data: data ?? null });
+	};
 
 	/**
 	 * Listen to a message
@@ -57,25 +74,16 @@ class EventEmitter {
 	}
 
 	/**
-	 * Listen to a message once
-	 * @param name
-	 * @param callback
-	 */
-	once<T>(name: string, callback: Listener<T>) {
-		const remove = this.on<T>(name, (data, emit) => {
-			callback(data, emit);
-			remove();
-		});
-	}
-
-	/**
 	 * Ask for data
 	 * @param name
 	 */
 	ask<R>(name: string, data?: unknown) {
-		this.emit(name, data);
+		const requestId = this.nextRequestId++;
 
-		return new Promise<R>((resolve) => this.once<R>(name, resolve));
+		return new Promise<R>((resolve) => {
+			this.pending.set(requestId, resolve as (data: unknown) => void);
+			this.post({ name, data: data ?? null, requestId });
+		});
 	}
 
 	/**
@@ -87,13 +95,13 @@ class EventEmitter {
 		name: string,
 		functionOrValue: ((data: T) => R | Promise<R>) | R,
 	) {
-		this.on<T>(name, (incomingData, emit) => {
+		this.on<T>(name, (incomingData, reply) => {
 			if (typeof functionOrValue === "function") {
 				void Promise.resolve(
 					(functionOrValue as (data: T) => R | Promise<R>)(incomingData),
-				).then((data) => emit(name, data));
+				).then((data) => reply(name, data));
 			} else {
-				emit(name, functionOrValue);
+				reply(name, functionOrValue);
 			}
 		});
 	}
