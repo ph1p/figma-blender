@@ -1,6 +1,7 @@
 import bmesh
 import bpy
 import os
+import tempfile
 
 from .properties import globalDict
 
@@ -13,7 +14,7 @@ def handle_material(data, name, width, height):
         if bpy.context.area:
             bpy.context.area.tag_redraw()
 
-    path = "/tmp/"
+    path = tempfile.gettempdir()
 
     if figma.folder_path:
         path = figma.folder_path
