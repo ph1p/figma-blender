@@ -7,9 +7,15 @@ import { ElementIcon } from "../assets/ElementIcon";
 import { FigmaLogo } from "../assets/FigmaLogo";
 import { PageIcon } from "../assets/PageIcon";
 import { ScalingIcon } from "../assets/ScalingIcon";
+import { Select } from "../components/Select";
 import EventEmitter from "../shared/EventEmitter";
 import { useStore } from "../store";
 import { ConnectionEnum } from "../utils/interfaces";
+
+const SCALE_OPTIONS = [0.5, 0.75, 1, 2, 3].map((value) => ({
+	value,
+	label: `${value}x`,
+}));
 
 const FooterElement = () => (
 	<Footer>
@@ -18,7 +24,7 @@ const FooterElement = () => (
 			target="_blank"
 			rel="noreferrer"
 		>
-			Get the Blender Addon (it's free) {"->"}
+			Get the Blender addon (free) ↗
 		</a>
 	</Footer>
 );
@@ -36,22 +42,19 @@ const Home: FunctionComponent = observer(() => {
 		return (
 			<Wrapper>
 				<Loader>
-					<p>
-						{store.addonTooNew ? (
-							<>
-								Blender addon is newer
-								<br />
-								than this plugin, please update it
-							</>
-						) : store.notAllowed ? (
-							<>
-								One connected plugin
-								<br />
-								at a time is allowed
-							</>
-						) : (
-							"Waiting for Blender..."
-						)}
+					<p className="title">
+						{store.addonTooNew
+							? "Update this plugin"
+							: store.notAllowed
+								? "Already connected"
+								: "Waiting for Blender…"}
+					</p>
+					<p className="hint">
+						{store.addonTooNew
+							? "The Blender addon is newer than this plugin."
+							: store.notAllowed
+								? "Only one plugin can connect at a time."
+								: "Start the server in the Blender addon panel."}
 					</p>
 					{!store.addonTooNew && <Progress />}
 				</Loader>
@@ -62,239 +65,243 @@ const Home: FunctionComponent = observer(() => {
 
 	return (
 		<Wrapper>
-			<div>
-				<List>
-					<li>
-						<div className="name">
-							<ElementIcon className="icon element" />
-							Elements
-						</div>
-						<div>{store.elements.length}</div>
-					</li>
-					<li>
-						<div className="name">
+			<Main>
+				<Header>
+					<Status>
+						<span className="dot" />
+						Connected to Blender
+					</Status>
+				</Header>
+				<Section>
+					<Row>
+						<Label>
 							<PageIcon className="icon" />
 							Page
-						</div>
-						<div>{store.page_name}</div>
-					</li>
-					<li>
-						<div className="name">
+						</Label>
+						<Value title={store.page_name}>{store.page_name}</Value>
+					</Row>
+					<Row>
+						<Label>
+							<ElementIcon className="icon" />
+							Elements
+						</Label>
+						<Value>{store.elements.length}</Value>
+					</Row>
+					<Row>
+						<Label>
 							<ScalingIcon className="icon" />
-							Image/Scale
-						</div>
-						<div>
-							<select
-								name="scaling"
-								value={store.scaling}
-								onChange={(e) => store.setScaling(+e.currentTarget.value)}
-							>
-								<option value="0.5">0.5x</option>
-								<option value="0.75">0.75x</option>
-								<option value="1">1x</option>
-								<option value="2">2x</option>
-								<option value="3">3x</option>
-							</select>
-						</div>
-					</li>
-				</List>
-				<Button onClick={askForFrames}>
-					<div className="icon">
+							Image scale
+						</Label>
+						<Select
+							aria-label="Image scale"
+							value={store.scaling}
+							options={SCALE_OPTIONS}
+							onChange={(value) => store.setScaling(value)}
+						/>
+					</Row>
+				</Section>
+				<Button type="button" onClick={askForFrames}>
+					<span className="icon">
 						<FigmaLogo />
-					</div>
-					<div>Update Elements</div>
-					<div className="icon">
+					</span>
+					<span className="label">Update elements</span>
+					<span className="icon">
 						<BlenderLogo />
-					</div>
+					</span>
 				</Button>
-			</div>
+			</Main>
 
 			<FooterElement />
 		</Wrapper>
 	);
 });
 
-const List = styled.ul`
-	list-style: none;
-	margin: 0 0 12px;
-	padding: 0;
-	li {
-		font-weight: 600;
-		background-color: var(--figma-color-bg);
-		display: flex;
-		padding: 12px 15px;
-		border-radius: 8px 8px 0 0;
-		justify-content: space-between;
-		div {
-			align-self: center;
-			align-items: center;
-		}
-		.name {
-			display: flex;
-			.icon {
-				margin-right: 12px;
-				&.element {
-					width: 12px;
-					height: 12px;
-				}
-				path {
-					fill: var(--figma-color-text);
-				}
-			}
-		}
-		&:last-child {
-			margin-top: 1px;
-			border-radius: 0 0 8px 8px;
-		}
-	}
+const brandGradient = `linear-gradient(
+	90deg,
+	#1bbcff -24.77%,
+	#a259ff 32.63%,
+	#ea7600 91.77%
+)`;
+
+const gradient = keyframes`
+	0% { background-position: 0% 50%; }
+	50% { background-position: 100% 50%; }
+	100% { background-position: 0% 50%; }
 `;
 
-const Footer = styled.footer`
-	font-size: 11px;
-	color: #888888;
-	text-align: center;
-	a {
-		color: #888888;
-	}
+const pulse = keyframes`
+	0% { box-shadow: 0 0 0 0 rgba(20, 174, 92, 0.5); }
+	70% { box-shadow: 0 0 0 5px rgba(20, 174, 92, 0); }
+	100% { box-shadow: 0 0 0 0 rgba(20, 174, 92, 0); }
 `;
 
 const Wrapper = styled.div`
 	display: grid;
-	grid-template-rows: 1fr 24px;
-	padding: 15px;
-	height: 100%;
+	grid-template-rows: 1fr auto;
+	height: 100vh;
+	padding: 12px 16px;
 `;
 
-const gradient = keyframes`
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+const Main = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
 `;
 
-const Progress = styled.div`
-	background: linear-gradient(
-		90deg,
-		#1bbcff -24.77%,
-		#a259ff 32.63%,
-		#ea7600 91.77%
-	);
-	background-size: 300% 100%;
-	animation: ${gradient} 2s ease infinite;
-	border-radius: 54px;
-	height: 8px;
-	width: 142px;
+const Header = styled.header`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: 24px;
+`;
+
+const Status = styled.div`
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 11px;
+	font-weight: 550;
+	.dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--figma-color-bg-success, #14ae5c);
+		animation: ${pulse} 2s ease-out infinite;
+	}
+`;
+
+const Section = styled.div`
+	display: flex;
+	flex-direction: column;
+	padding: 4px 0;
+	border-top: 1px solid var(--figma-color-border, #e6e6e6);
+	border-bottom: 1px solid var(--figma-color-border, #e6e6e6);
+`;
+
+const Row = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	min-height: 32px;
+`;
+
+const Label = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 11px;
+	color: var(--figma-color-text-secondary, rgba(0, 0, 0, 0.5));
+	white-space: nowrap;
+	.icon {
+		width: 12px;
+		height: 12px;
+		path {
+			fill: var(--figma-color-icon-secondary, rgba(0, 0, 0, 0.5));
+			fill-opacity: 1;
+		}
+	}
+`;
+
+const Value = styled.div`
+	padding-right: 8px;
+	font-size: 11px;
+	font-weight: 550;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+`;
+
+const Footer = styled.footer`
+	padding-top: 8px;
+	font-size: 11px;
+	text-align: center;
+	a {
+		color: var(--figma-color-text-tertiary, rgba(0, 0, 0, 0.3));
+		text-decoration: none;
+		&:hover {
+			color: var(--figma-color-text-secondary, rgba(0, 0, 0, 0.5));
+		}
+	}
 `;
 
 const Loader = styled.div`
 	align-self: center;
-	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 	text-align: center;
-	p {
-		margin: 0 0 12px 0;
+	.title {
+		margin: 0 0 4px;
 		font-size: 13px;
 		font-weight: 600;
 	}
+	.hint {
+		margin: 0 0 16px;
+		font-size: 11px;
+		color: var(--figma-color-text-secondary, rgba(0, 0, 0, 0.5));
+	}
+`;
+
+const Progress = styled.div`
+	background: ${brandGradient};
+	background-size: 300% 100%;
+	animation: ${gradient} 2s ease infinite;
+	border-radius: 999px;
+	height: 4px;
+	width: 120px;
 `;
 
 const Button = styled.button`
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	cursor: pointer;
-	font-size: 12px;
-	font-weight: 600;
-	background: linear-gradient(
-		90deg,
-		#1bbcff -24.77%,
-		#a259ff 32.63%,
-		#ea7600 91.77%
-	);
-	border-radius: 8px;
-	padding: 8px;
-	border: 0;
-	width: 100%;
-	height: 48px;
-	color: #fff;
 	position: relative;
-	animation: ${gradient} 3s ease infinite;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	height: 40px;
+	padding: 0 6px;
+	font: inherit;
+	font-size: 11px;
+	font-weight: 600;
+	color: #fff;
+	background: ${brandGradient};
+	background-size: 200% 100%;
+	border: 0;
+	border-radius: 8px;
+	cursor: pointer;
+	outline: none;
+	transition:
+		background-position 0.4s ease,
+		transform 0.1s ease;
+
 	&:hover {
-		background-size: 400% 100%;
-		&::after {
-			background-size: 400% 100%;
-			animation: ${gradient} 3s ease infinite;
-		}
+		background-position: 100% 50%;
 	}
 	&:active {
-		top: 1px;
+		transform: scale(0.98);
 	}
-	&::after {
-		content: "";
-		position: absolute;
-		left: 10px;
-		top: 13px;
-		background: linear-gradient(
-			90deg,
-			#1bbcff -24.77%,
-			#a259ff 32.63%,
-			#ea7600 91.77%
-		);
-		opacity: 0.7;
-		filter: blur(16px);
-		border-radius: 8px;
-		width: 191px;
-		height: 42px;
-		z-index: -1;
+	&:focus-visible {
+		box-shadow:
+			0 0 0 2px var(--figma-color-bg, #fff),
+			0 0 0 4px var(--figma-color-border-selected, #0d99ff);
 	}
+
+	.label {
+		flex: 1;
+		text-align: center;
+	}
+
 	.icon {
-		background: rgba(255, 255, 255, 0.22);
-		border-radius: 3.5px;
-		position: relative;
-		&::after {
-			content: "";
-			position: absolute;
-			top: 50%;
-			right: -2.5px;
-			margin-top: -2.5px;
-			width: 5px;
-			height: 5px;
-			transform: rotate(45deg);
-			background-color: #fff;
-		}
-		&::before {
-			content: "";
-			position: absolute;
-			top: 50%;
-			right: -10px;
-			margin-top: 0px;
-			width: 10px;
-			height: 1px;
-			background-color: #fff;
-		}
-		&:first-child {
-			padding: 7px 10px 7px 11px;
-			svg {
-				width: 12px;
-				height: 19px;
-			}
-		}
-		&:last-child {
-			padding: 6px 7px 8px;
-			svg {
-				width: 19px;
-				height: 19px;
-			}
-			&::after {
-				left: -2.5px;
-			}
-			&::before {
-				left: -10px;
-			}
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: 6px;
+		svg {
+			width: 14px;
+			height: 14px;
 		}
 	}
 `;
