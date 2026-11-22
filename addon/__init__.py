@@ -3,27 +3,13 @@ import asyncio
 from bpy.types import Scene, AddonPreferences
 from bpy.props import PointerProperty, BoolProperty
 
-from .packages import check_deps_on_startup
 from .properties import FigmaProperties
 from .panels import (
     FIGMA_PT_elements,
     FIGMA_PT_folder_path,
     FIGMA_PT_main,
 )
-from .operators import FIGMA_OT_add_to_scene, FIGMA_OT_Server, FIGMA_OT_OpenBrowser, FIGMA_OT_InstallDeps, FIGMA_OT_TestServer
-
-bl_info = {
-    "name": "Figma",
-    "author": "Philip Stapelfeldt",
-    "location": "View3D > Panel > Figma",
-    "version": (0, 0, 5),
-    "blender": (4, 2, 0),
-    "description": "Import textures from figma",
-    "warning": "",
-    "doc_url": "https://github.com/ph1p/figma-blender",
-    "support": "COMMUNITY",
-    "category": "3D View",
-}
+from .operators import FIGMA_OT_add_to_scene, FIGMA_OT_Server, FIGMA_OT_OpenBrowser, FIGMA_OT_TestServer
 
 class FigmaAddonPreferences(AddonPreferences):
     bl_idname = __package__
@@ -41,7 +27,6 @@ class FigmaAddonPreferences(AddonPreferences):
 classes = (
     FigmaAddonPreferences,
     FIGMA_OT_Server,
-    FIGMA_OT_InstallDeps,
     FIGMA_OT_TestServer,
     FigmaProperties,
     FIGMA_PT_main,
@@ -94,13 +79,8 @@ def process_asyncio_events():
     return None  # Stop timer when server is not running
 
 def auto_start_server_if_enabled():
-    """Auto-start server if preference is enabled and dependencies are installed."""
+    """Auto-start server if preference is enabled."""
     from .properties import globalDict
-
-    if not globalDict.get("deps_installed", False):
-        if globalDict.get("deps_checking", False):
-            return 1.0
-        return None
 
     preferences = bpy.context.preferences.addons.get(__package__)
     if preferences and preferences.preferences.auto_start_server:
@@ -133,7 +113,6 @@ def register():
 
     Scene.figma = PointerProperty(type=FigmaProperties)
 
-    check_deps_on_startup()
     bpy.app.timers.register(auto_start_server_if_enabled, first_interval=1.0, persistent=True)
 
 def unregister():

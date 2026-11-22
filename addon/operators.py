@@ -98,30 +98,6 @@ class FIGMA_OT_add_to_scene(Operator):
         return {'FINISHED'}
 
 
-class FIGMA_OT_InstallDeps(Operator):
-    """Manually install websockets dependency"""
-    bl_idname = "figma.install_deps"
-    bl_label = "Install Dependencies"
-
-    def execute(self, context):
-        import threading
-        from .packages import install_threaded
-
-        if globalDict.get("deps_checking", False):
-            self.report({'WARNING'}, "Installation is already running")
-            return {'CANCELLED'}
-
-        # pip can take minutes; running it here would freeze Blender's UI.
-        globalDict["deps_checking"] = True
-        globalDict["deps_needs_restart"] = False
-        threading.Thread(target=install_threaded, daemon=True).start()
-
-        self.report({'INFO'}, "Installing websockets in the background, see the console for progress")
-        print("Figma addon: Manual dependency installation started")
-
-        return {'FINISHED'}
-
-
 class FIGMA_OT_TestServer(Operator):
     """Test if the WebSocket server is responding"""
     bl_idname = "figma.test_server"

@@ -13,10 +13,10 @@ https://user-images.githubusercontent.com/15351728/163018521-d6d704bb-f280-499c-
 ## How to?
 
 Search the "Blender connect" plugin in figma and install it.
-Download the "Figma Blender Addon" from here: https://ph1p.gumroad.com/l/figma-blender-addon and install it (Edit -> Preferences -> Addons -> Install...)
+Download the "Figma Blender Addon" from here: https://ph1p.gumroad.com/l/figma-blender-addon and install the zip (Blender 4.2+: _Edit → Preferences → Get Extensions → ⌄ → Install from Disk…_). Remove any older "Figma" add-on first.
 
 - Start Figma Plugin (https://www.figma.com/community/plugin/1095047912165244715/Blender-connect)
-- Start Blender Addon. **Blender may freeze for a few seconds the first time, as dependencies are installed in the background.**
+- Start Blender Addon
 - Press `n` in Blender to open the sidebar
 - Click on `Figma` and choose a folder for your textures
 - Next start the server. The figma plugin UI should change and you're now able to import textures
@@ -28,23 +28,9 @@ Download the "Figma Blender Addon" from here: https://ph1p.gumroad.com/l/figma-b
 
 ## FAQ
 
-### My Plugin does no start!
+### My Plugin does not start!
 
-The addon may not have been able to install the `websockets` dependency. You can also do this manually via the command line, using **Blender's own Python** rather than a system Python. Replace the Blender version (`5.2`) and the Python version (`python3.13`) in the paths if yours differ.
-
-**MacOS**
-
-```bash
-/Applications/Blender.app/Contents/Resources/5.2/python/bin/python3.13 -m pip install --user websockets
-```
-
-**Windows**
-
-```bash
-"C:\Program Files\Blender Foundation\Blender 5.2\5.2\python\bin\python.exe" -m pip install --user websockets
-```
-
-`--user` installs into your per-user site-packages, so no admin rights are needed — Blender's own `site-packages` lives under the read-only installation directory. The addon adds the user directory to `sys.path` on startup. Restart Blender once the install finishes.
+The `websockets` dependency ships inside the extension zip, so nothing has to be installed. Check that port `1410` is free (only one Blender instance can run the server) and look at the system console for `Figma addon:` messages.
 
 ## Development
 
@@ -60,6 +46,14 @@ pnpm watch # rebuilds dist/ on every change
 After that, import it into the Figma **desktop** app under _Plugins → Development → Import plugin from manifest…_ and select `plugin/dist/manifest.json`. Re-run the plugin in Figma to pick up a rebuild.
 
 Use `pnpm build` for a one-off production build.
+
+### Packaging the Blender addon
+
+```bash
+scripts/build_addon.sh   # -> dist/figma_connect-<version>.zip
+```
+
+It validates and builds the extension with Blender (set `BLENDER=/path/to/blender` if it is not on your `PATH`). Bump `version` in `addon/blender_manifest.toml` before each release. To update the bundled `websockets`, replace the wheel in `addon/wheels/` and its file name in the manifest.
 
 ### Blender
 

@@ -20,70 +20,41 @@ class FIGMA_PT_main(FigmaPanel, Panel):
 
     def draw_header(self, context):
         layout = self.layout
-        if globalDict.get("deps_installed", False):
-            if globalDict.get("is_started", False):
-                if globalDict.get("plugin_connected", False):
-                    layout.label(text="", icon='LINKED')
-                else:
-                    layout.label(text="", icon='RADIOBUT_ON')
+        if globalDict.get("is_started", False):
+            if globalDict.get("plugin_connected", False):
+                layout.label(text="", icon='LINKED')
             else:
-                layout.label(text="", icon='RADIOBUT_OFF')
+                layout.label(text="", icon='RADIOBUT_ON')
         else:
-            layout.label(text="", icon='ERROR')
+            layout.label(text="", icon='RADIOBUT_OFF')
 
     def draw(self, context):
         layout = self.layout
 
-        if globalDict.get("deps_installed", False):
-            box = layout.box()
-            col = box.column(align=True)
+        box = layout.box()
+        col = box.column(align=True)
 
-            row = col.row(align=True)
+        row = col.row(align=True)
+        if globalDict.get("is_started", False):
+            row.label(text="Server: Running", icon='CHECKMARK')
+            row.operator("figma.server", text="Stop", icon='PAUSE')
+        else:
+            row.label(text="Server: Stopped", icon='CANCEL')
+            row.operator("figma.server", text="Start", icon='PLAY')
+
+        row = col.row()
+        if globalDict.get("plugin_connected", False):
+            row.label(text="Plugin: Connected", icon='LINKED')
+        else:
             if globalDict.get("is_started", False):
-                row.label(text="Server: Running", icon='CHECKMARK')
-                row.operator("figma.server", text="Stop", icon='PAUSE')
+                row.label(text="Plugin: Not connected", icon='UNLINKED')
             else:
-                row.label(text="Server: Stopped", icon='CANCEL')
-                row.operator("figma.server", text="Start", icon='PLAY')
-
-            row = col.row()
-            if globalDict.get("plugin_connected", False):
-                row.label(text="Plugin: Connected", icon='LINKED')
-            else:
-                if globalDict.get("is_started", False):
-                    row.label(text="Plugin: Not connected", icon='UNLINKED')
-                else:
-                    row.label(text="Plugin: Waiting for server", icon='UNLINKED')
-
-        if globalDict.get("deps_checking", False):
-            row = layout.row()
-            row.label(text="Installing dependencies...", icon="SORTTIME")
-            row = layout.row()
-            row.label(text="This may take a minute", icon="INFO")
-            row = layout.row()
-            row.label(text="Check console for progress", icon="CONSOLE")
-        elif not globalDict.get("deps_installed", False):
-            if globalDict.get("deps_needs_restart", False):
-                row = layout.row()
-                row.label(text="Dependencies installed!", icon="CHECKMARK")
-                row = layout.row()
-                row.label(text="Please RESTART BLENDER", icon="ERROR")
-            else:
-                row = layout.row()
-                row.label(text="Dependencies not installed", icon="ERROR")
-                row = layout.row()
-                row.operator("figma.install_deps", text="Install Dependencies", icon="IMPORT")
-                row = layout.row()
-                row.label(text="Check console for error details", icon="INFO")
+                row.label(text="Plugin: Waiting for server", icon='UNLINKED')
 
 
 class FIGMA_PT_folder_path(FigmaPanel, Panel):
     bl_label = "Folder settings"
     bl_parent_id = "FIGMA_PT_main"
-
-    @classmethod
-    def poll(cls, context):
-        return globalDict.get("deps_installed", False)
 
     def draw(self, context):
         layout = self.layout
@@ -109,8 +80,7 @@ class FIGMA_PT_elements(FigmaPanel, Panel):
     @classmethod
     def poll(cls, context):
         return (
-            globalDict.get("deps_installed", False)
-            and globalDict.get("is_started", False)
+            globalDict.get("is_started", False)
             and globalDict.get("connected") is not None
             and context.scene.figma is not None
             and context.scene.figma.folder_path != ""

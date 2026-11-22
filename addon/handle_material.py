@@ -16,6 +16,17 @@ def safe_file_name(name):
     return os.path.basename(str(name).replace("\\", "/")).strip(". ")
 
 
+def default_texture_folder():
+    """Fallback when no folder is chosen. The temp dir gets wiped, which would
+    break the image paths saved in the .blend, so prefer the extension's own
+    user directory."""
+    try:
+        return bpy.utils.extension_path_user(__package__, path="textures", create=True)
+    except Exception:
+        # Loaded as a legacy add-on (e.g. from the VS Code dev setup).
+        return tempfile.gettempdir()
+
+
 def find_material_index(obj, name):
     for index, material in enumerate(obj.data.materials):
         if material is not None and material.name == name:
@@ -100,7 +111,7 @@ def handle_material(data, name, width, height):
         if not name:
             raise ValueError("empty element name")
 
-        folder = figma.folder_path or tempfile.gettempdir()
+        folder = figma.folder_path or default_texture_folder()
         file_path = os.path.join(folder, name + ".png")
 
         with open(file_path, "wb") as file:

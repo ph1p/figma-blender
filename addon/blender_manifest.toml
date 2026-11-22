@@ -1,17 +1,23 @@
 schema_version = "1.0.0"
 
-id = "figma"
-version = "0.0.5"
-name = "Figma"
-tagline = "Import textures from Figma"
+id = "figma_connect"
+version = "0.1.0"
+name = "Figma Connect"
+tagline = "Load Figma frames as textures into your scene"
 maintainer = "Philip Stapelfeldt"
 type = "add-on"
 website = "https://github.com/ph1p/figma-blender"
 tags = ["Import-Export", "Material"]
 
 blender_version_min = "4.2.0"
-license = ["SPDX:MIT"]
+license = ["SPDX:GPL-3.0-or-later"]
+copyright = ["2022-2026 Philip Stapelfeldt"]
+
+wheels = ["./wheels/websockets-17.4-py3-none-any.whl"]
 
 [permissions]
 network = "Runs a local WebSocket server for the Figma plugin"
 files = "Saves textures to the chosen folder"
+
+[build]
+paths_exclude_pattern = ["__pycache__/", "*.pyc", ".*"]

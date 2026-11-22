@@ -10,9 +10,6 @@ globalDict = {
     "is_started": False,
     "is_loading": False,
     "plugin_connected": False,
-    "deps_installed": False,
-    "deps_checking": False,
-    "deps_needs_restart": False,
     "elements": [],
 }
 
