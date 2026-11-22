@@ -153,6 +153,8 @@ async def server():
             websocket_handler, "localhost", 1410, origins=ALLOWED_ORIGINS
         ) as ws_server:
             globalDict["ws_server"] = ws_server
+            globalDict["is_listening"] = True
+            tag_redraw()
             print("Figma addon: Websocket server started successfully")
             await asyncio.Future()  # Run forever until cancelled
     except asyncio.CancelledError:
@@ -175,6 +177,7 @@ async def server():
             globalDict["ws_server"] = None
             globalDict["connected"] = None
             globalDict["is_started"] = False
+            globalDict["is_listening"] = False
 
         tag_redraw()
 
@@ -225,4 +228,5 @@ def stop_server(timeout=2.0):
     globalDict["connected"] = None
     globalDict["plugin_connected"] = False
     globalDict["is_started"] = False
+    globalDict["is_listening"] = False
     globalDict["is_loading"] = False

@@ -8,6 +8,8 @@ globalDict = {
     "ws_server": None,
     "connected": None,
     "is_started": False,
+    # True only once the socket is bound; is_started flips before that.
+    "is_listening": False,
     "is_loading": False,
     "plugin_connected": False,
     "elements": [],

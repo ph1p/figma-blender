@@ -23,6 +23,8 @@ class FIGMA_PT_main(FigmaPanel, Panel):
         if globalDict.get("is_started", False):
             if globalDict.get("plugin_connected", False):
                 layout.label(text="", icon='LINKED')
+            elif not globalDict.get("is_listening", False):
+                layout.label(text="", icon='SORTTIME')
             else:
                 layout.label(text="", icon='RADIOBUT_ON')
         else:
@@ -36,7 +38,10 @@ class FIGMA_PT_main(FigmaPanel, Panel):
 
         row = col.row(align=True)
         if globalDict.get("is_started", False):
-            row.label(text="Server: Running", icon='CHECKMARK')
+            if globalDict.get("is_listening", False):
+                row.label(text="Server: Running", icon='CHECKMARK')
+            else:
+                row.label(text="Server: Starting…", icon='SORTTIME')
             row.operator("figma.server", text="Stop", icon='PAUSE')
         else:
             row.label(text="Server: Stopped", icon='CANCEL')
@@ -46,7 +51,7 @@ class FIGMA_PT_main(FigmaPanel, Panel):
         if globalDict.get("plugin_connected", False):
             row.label(text="Plugin: Connected", icon='LINKED')
         else:
-            if globalDict.get("is_started", False):
+            if globalDict.get("is_listening", False):
                 row.label(text="Plugin: Not connected", icon='UNLINKED')
             else:
                 row.label(text="Plugin: Waiting for server", icon='UNLINKED')
